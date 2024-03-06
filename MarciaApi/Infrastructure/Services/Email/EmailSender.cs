@@ -2,11 +2,20 @@ using MimeKit;
 using SmtpClient = System.Net.Mail.SmtpClient;
 using System;
 using MailKit.Security;
+using MarciaApi.Application.Services.Email;
 
 namespace MarciaApi.Infrastructure.Services.Email;
 
 public class EmailSender : IEmailSender
 {
+    private readonly IConfiguration _configuration;
+
+    public EmailSender(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+
     public async Task SendEmailAsync(string email, string subject, string body)
     {
 
@@ -14,9 +23,9 @@ public class EmailSender : IEmailSender
         {
             MimeMessage message = new();
             
-            message.From.Add(new MailboxAddress("marmitaria da marcia", "caiomartinsdiesel@gmail.com"));
+            message.From.Add(new MailboxAddress(_configuration["MailKitSettings:MyEmailName"], _configuration["MailKitSettings:MyEmail"]));
             
-            message.To.Add(new MailboxAddress("destino", "joojjunu@gmail.com"));
+            message.To.Add(new MailboxAddress("Client", email));
             message.Subject = subject;
             message.Body = new TextPart()
             {
@@ -25,8 +34,8 @@ public class EmailSender : IEmailSender
 
             using (var client = new MailKit.Net.Smtp.SmtpClient())
             {
-                await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync("caiomartinsdiesel@gmail.com", "hxmk dzif zmzz yyiz");
+                await client.ConnectAsync(_configuration["MailKitSettings:EmailServer"], 587, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_configuration["MailKitSettings:MyEmail"], _configuration["MailKitSettings:MyEmailPassword"]);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
             }

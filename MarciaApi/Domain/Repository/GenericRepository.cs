@@ -1,24 +1,41 @@
+using MarciaApi.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace MarciaApi.Domain.Repository;
 
 public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
+    private readonly AppDbContext _context;
+
+    public GenericRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
     public async Task<List<T>> Get(int pageNumber)
     {
-        throw new NotImplementedException();
+        return await _context.Set<T>().Skip(pageNumber * 5).Take(5).ToListAsync();
     }
 
     public async Task<T> GetByID(string id)
     {
-        throw new NotImplementedException();
+        return await _context.Set<T>().FindAsync(id);
+    }
+
+    public async Task Add(T model)
+    {
+        await _context.Set<T>().AddAsync(model);
+    }
+
+    public async Task SaveAll()
+    {
+        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> Any()
     {
-        throw new NotImplementedException();
+        return await _context.Set<T>().AnyAsync();
     }
 
-    public async Task<bool> Any(string id)
-    {
-        throw new NotImplementedException();
-    }
+    
 }

@@ -1,4 +1,4 @@
-namespace MarciaApi.Infrastructure.Services.Email;
+namespace MarciaApi.Application.Services.Email;
 
 public interface IEmailSender
 {
