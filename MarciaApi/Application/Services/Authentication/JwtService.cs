@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using MarciaApi.Domain.Models;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,20 +18,26 @@ public class JwtService : IJwtService
         _logger = logger;
     }
 
-    public async Task<string> Generate(UserViewModel model)
+    public async Task<string> Generate(UserModel model)
     {
         var hanlder = new JwtSecurityTokenHandler();
 
-        var claims = new ClaimsIdentity(new []
+        var claims = new List<Claim>();
+        
+        claims.Add(new Claim(ClaimTypes.Email, model.Email));
+        
+        foreach (var role in model.Roles)
         {
-            new Claim(ClaimTypes.Email, model.Email)
-        });
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var claimsIndetity = new ClaimsIdentity(claims);
 
         var experies = DateTime.UtcNow.AddDays(2);
 
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
-            Subject = claims,
+            Subject = claimsIndetity,
             Expires = experies,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(
                     Encoding.ASCII.GetBytes(_configuration["Jwt:SecretKey"])),
@@ -64,6 +71,41 @@ public class JwtService : IJwtService
         try
         {
             var validationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
+            return validationResult.IsValid;
+        }
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogError(ex.ToString());
+            return false;
+        }
+    }
+
+    public async Task<bool> ValidateMangager(string token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"])),
+            ValidateIssuer = true,
+            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = _configuration["Jwt:Audience"],
+            ValidateLifetime = true
+        };
+
+        var handler = new JwtSecurityTokenHandler();
+
+        try
+        {
+            var validationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
+            
+            var claimsIdentity = validationResult.ClaimsIdentity;
+            if (!claimsIdentity.HasClaim(ClaimTypes.Role, "Manager"))
+            {
+                _logger.LogError("User tried to access protected endpoint!");
+                return false;
+            }
+            
             return validationResult.IsValid;
         }
         catch (SecurityTokenException ex)

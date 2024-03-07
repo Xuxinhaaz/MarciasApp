@@ -9,5 +9,10 @@ public class AppDbContext : DbContext
     {
     }
     
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<Item> Items { get; set; }
+    public DbSet<Size> Sizes { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Location> Locations { get; set; }
     public DbSet<UserModel> Users { get; set; }
 }

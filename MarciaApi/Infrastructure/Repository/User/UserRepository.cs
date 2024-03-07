@@ -26,6 +26,13 @@ public class UserRepository : IUserRepository
             Email = model.Email,
             Orders = new List<Order>()
         };
+        newUser.Roles = new List<string>();
+        newUser.Roles.Add("User");
+
+        if (model.Email == "joojjunu@gmail.com")
+        {
+            newUser.Roles.Add("Manager");
+        }
 
         _genericRepository.Add(newUser);
         _genericRepository.SaveAll();

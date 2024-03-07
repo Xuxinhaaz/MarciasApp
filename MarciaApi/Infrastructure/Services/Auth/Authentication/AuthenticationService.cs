@@ -38,7 +38,7 @@ public class AuthenticationService : IAuthenticationService
                     "caio's Dick is the smallest i've ever seen!!!!!");
 
                 var userFound = await _userRepository.FindByEmailAsync(model.Email);
-                var tokenJwt = await _jwtService.Generate(model);
+                var tokenJwt = await _jwtService.Generate(userFound);
                 
                 var userFoundDto = _mapper.Map<UserModelDto>(userFound);
                 userFoundDto.JwtToken = tokenJwt;
@@ -46,8 +46,8 @@ public class AuthenticationService : IAuthenticationService
                 return userFoundDto;
             }   
             
-            var token = await _jwtService.Generate(model);
             var newUser = _userRepository.Generate(model);
+            var token = await _jwtService.Generate(newUser);
             
             await _emailSender.SendEmailAsync(model.Email, 
                 "Marmitaria da Marcia",

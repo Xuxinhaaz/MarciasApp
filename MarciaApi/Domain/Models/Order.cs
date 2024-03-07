@@ -12,6 +12,8 @@ public class Order
     public string? UserPhone { get; set; }
     public double? TotalPrice { get; set; }
     public bool? IsPaid { get; set; }
+    public List<Product>? Products { get; set; }
+    public Location? Location { get; set; }
     [ForeignKey("Id")]
     public string? UsersId { get; set; }
   
