@@ -9,5 +9,6 @@ public class UserModelDto
     public string? Id { get; set; }
     public string? Email { get; set; }
     public List<Order>? Orders { get; set; }
+    public DateTime WhenWasCreated { get; set; }
     public string? JwtToken { get; set; }
 }

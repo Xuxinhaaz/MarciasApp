@@ -11,14 +11,16 @@ public class UserRepository : IUserRepository
 {
     private readonly IGenericRepository<UserModel> _genericRepository;
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
 
-    public UserRepository(IGenericRepository<UserModel> genericRepository, AppDbContext context)
+    public UserRepository(IGenericRepository<UserModel> genericRepository, AppDbContext context, IConfiguration configuration)
     {
         _genericRepository = genericRepository;
         _context = context;
+        _configuration = configuration;
     }
 
-    public UserModel Generate(UserViewModel model)
+    public async Task<UserModel> Generate(UserViewModel model)
     {
         var newUser =  new UserModel()
         {
@@ -29,13 +31,13 @@ public class UserRepository : IUserRepository
         newUser.Roles = new List<string>();
         newUser.Roles.Add("User");
 
-        if (model.Email == "joojjunu@gmail.com")
+        if (model.Email == _configuration["ManagerEmail"])
         {
             newUser.Roles.Add("Manager");
         }
 
-        _genericRepository.Add(newUser);
-        _genericRepository.SaveAll();
+        await _genericRepository.Add(newUser);
+        await _genericRepository.SaveAll();
 
         return newUser;
     }
@@ -43,6 +45,16 @@ public class UserRepository : IUserRepository
     public async Task<List<UserModel>> GetAll(int pageNumber)
     {
         return await _genericRepository.Get(pageNumber);
+    }
+
+    public async Task<UserModel> GetById(string? id)
+    {   
+        return await _context.Users.FindAsync(id);
+    }
+
+    public async Task<bool> AnyWithProvidedId(string id)
+    {
+        return await _context.Users.AnyAsync(x => x.Id == id);
     }
 
     public async Task<bool> AnyUserWithSameEmailProvided(string email)
@@ -53,5 +65,15 @@ public class UserRepository : IUserRepository
     public async Task<UserModel> FindByEmailAsync(string email)
     {
         return await _context.Users.FirstAsync(x => x.Email == email);
+    }
+
+    public async Task DeleteById(string id)
+    {
+        var userFound = await _context.Users
+            .Include(x => x.Orders)
+            .FirstAsync(x => x.Id == id);
+
+        await _genericRepository.Delete(userFound);
+        await _genericRepository.SaveAll();
     }
 }

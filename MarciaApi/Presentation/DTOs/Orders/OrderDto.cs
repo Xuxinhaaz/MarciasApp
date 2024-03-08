@@ -1,13 +1,12 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MarciaApi.Domain.Models;
 
-namespace MarciaApi.Domain.Models;
+namespace MarciaApi.Presentation.DTOs.Orders;
 
-public class Order
+public class OrderDto
 {
-    [Key]
     public string? OrderId { get; set; }
-    public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+    public DateTime OrderDate { get; set; }
     public string? UserName { get; set; }   
     public string? UserPhone { get; set; }
     public double? TotalPrice { get; set; }
@@ -15,7 +14,5 @@ public class Order
     public string? PaymentType { get; set; }
     public List<Product>? Products { get; set; }
     public Location? Location { get; set; }
-    [ForeignKey("Id")]
     public string? UsersId { get; set; }
-  
 }

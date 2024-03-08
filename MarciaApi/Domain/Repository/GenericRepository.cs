@@ -37,5 +37,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await _context.Set<T>().AnyAsync();
     }
 
-    
+    public async Task Delete(T model)
+    {
+        _context.Set<T>().Remove(model);
+    }
 }

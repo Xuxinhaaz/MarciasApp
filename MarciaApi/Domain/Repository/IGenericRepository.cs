@@ -7,4 +7,5 @@ public interface IGenericRepository<T>
     Task Add(T model);
     Task SaveAll();
     Task<bool> Any();
+    Task Delete(T model);
 }

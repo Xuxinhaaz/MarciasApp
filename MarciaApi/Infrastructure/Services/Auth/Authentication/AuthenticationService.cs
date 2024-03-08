@@ -46,7 +46,7 @@ public class AuthenticationService : IAuthenticationService
                 return userFoundDto;
             }   
             
-            var newUser = _userRepository.Generate(model);
+            var newUser = await _userRepository.Generate(model);
             var token = await _jwtService.Generate(newUser);
             
             await _emailSender.SendEmailAsync(model.Email, 
