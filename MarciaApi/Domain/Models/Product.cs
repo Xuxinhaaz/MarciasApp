@@ -7,9 +7,9 @@ public class Product
     [Key]
     public string? ProdutId { get; set; }
     public string? ProductName { get; set; }
-    public List<Order>? Orders { get; set; }
-    public List<Size>? Sizes { get; set; }
-    public List<Item>? AdditionalItems { get; set; }
+    public List<Order>? Orders { get; set; } = new();
+    public List<Size>? Sizes { get; set; } = new();
+    public List<Item>? Items { get; set; } = new();
     public string? ProductDescription { get; set; }
     public double? TotalProductPrice { get; set; }
 }

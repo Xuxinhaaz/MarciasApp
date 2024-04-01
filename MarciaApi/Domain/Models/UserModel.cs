@@ -8,6 +8,6 @@ public class UserModel
     public string? Id { get; set; }
     public string? Email { get; set; }
     public DateTime WhenWasCreated { get; set; } = DateTime.UtcNow;
-    public List<string> Roles { get; set; }
-    public List<Order>? Orders { get; set; }
+    public List<Roles> Roles { get; set; } = new();
+    public List<Order> Orders { get; set; } = new();
 }

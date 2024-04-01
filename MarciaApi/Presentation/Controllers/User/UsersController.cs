@@ -13,23 +13,18 @@ public class UsersController : ControllerBase
 {
     private readonly IValidator<UserViewModel> _usersViewModelValidator;
     private readonly MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService _authenticationService;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IUserRepository _userRepository;
     public UsersController(IValidator<UserViewModel> usersViewModelValidator, 
-        MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService authenticationService, 
-        IAuthorizationService authorizationService, 
-        IUserRepository userRepository)
+        MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService authenticationService
+        )
     {
         _usersViewModelValidator = usersViewModelValidator;
         _authenticationService = authenticationService;
-        _authorizationService = authorizationService;
-        _userRepository = userRepository;
     }
-    
+        
     [HttpPost("/Users")]
     public async Task<IActionResult> CreateAnUser([FromBody] UserViewModel viewModel)
     {
-        var responseAuth = _usersViewModelValidator.Validate(viewModel);
+        var responseAuth = await _usersViewModelValidator.ValidateAsync(viewModel);
         if (!responseAuth.IsValid)
         {
             var modelStateDictionary = new ModelStateDictionary();

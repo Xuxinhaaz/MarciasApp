@@ -3,6 +3,7 @@ using System;
 using MarciaApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarciaApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240314122526_ten")]
+    partial class ten
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,13 +27,13 @@ namespace MarciaApi.Migrations
 
             modelBuilder.Entity("ItemProduct", b =>
                 {
-                    b.Property<string>("ItemsItemId")
+                    b.Property<string>("AdditionalItemsItemId")
                         .HasColumnType("text");
 
                     b.Property<string>("ProductsProdutId")
                         .HasColumnType("text");
 
-                    b.HasKey("ItemsItemId", "ProductsProdutId");
+                    b.HasKey("AdditionalItemsItemId", "ProductsProdutId");
 
                     b.HasIndex("ProductsProdutId");
 
@@ -41,6 +44,9 @@ namespace MarciaApi.Migrations
                 {
                     b.Property<string>("ItemId")
                         .HasColumnType("text");
+
+                    b.Property<bool?>("IsRemoved")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ItemName")
                         .HasColumnType("text");
@@ -234,7 +240,7 @@ namespace MarciaApi.Migrations
                 {
                     b.HasOne("MarciaApi.Domain.Models.Item", null)
                         .WithMany()
-                        .HasForeignKey("ItemsItemId")
+                        .HasForeignKey("AdditionalItemsItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

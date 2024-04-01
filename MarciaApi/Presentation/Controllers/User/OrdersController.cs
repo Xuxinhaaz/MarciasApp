@@ -47,7 +47,7 @@ public class OrdersController
 
     [HttpPost("/Orders/{id}")]
     public async Task<IActionResult> PostAnOrder([FromHeader] string Authorization, 
-        [FromQuery] string id,
+        [FromRoute] string id,
         [FromBody] OrdersViewModel viewModel)
     {
         var auth = await _authorizationService.Authorize(Authorization);
@@ -92,6 +92,11 @@ public class OrdersController
 
         var newOrder = await _orderRepository.Generate(id, viewModel);
 
-        return new OkResult();
+        var orderDto = await _userRepository.Map(newOrder);
+
+        return new OkObjectResult(new
+        {
+            order = orderDto
+        });
     }
 }

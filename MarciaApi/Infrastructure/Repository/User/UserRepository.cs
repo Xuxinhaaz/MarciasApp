@@ -1,7 +1,9 @@
+using AutoMapper;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
+using MarciaApi.Presentation.DTOs.Orders;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,32 +11,37 @@ namespace MarciaApi.Infrastructure.Repository.User;
 
 public class UserRepository : IUserRepository
 {
+    private readonly IMapper _mapper;
     private readonly IGenericRepository<UserModel> _genericRepository;
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
 
-    public UserRepository(IGenericRepository<UserModel> genericRepository, AppDbContext context, IConfiguration configuration)
+    public UserRepository(IGenericRepository<UserModel> genericRepository, AppDbContext context, IConfiguration configuration, IMapper mapper)
     {
         _genericRepository = genericRepository;
         _context = context;
         _configuration = configuration;
+        _mapper = mapper;
     }
 
     public async Task<UserModel> Generate(UserViewModel model)
     {
+        var ClientRole = await _context.Roles.FirstAsync(x => x.Role == "Client");
+        
         var newUser =  new UserModel()
         {
             Id = Guid.NewGuid().ToString(),
             Email = model.Email,
-            Orders = new List<Order>()
         };
-        newUser.Roles = new List<string>();
-        newUser.Roles.Add("User");
+       
+        newUser.Roles.Add(ClientRole);
 
         if (model.Email == _configuration["ManagerEmail"])
         {
-            newUser.Roles.Add("Manager");
+            newUser.Roles.Add(await _context.Roles.FirstAsync(x => x.Role == "Manager"));
         }
+        
+        
 
         await _genericRepository.Add(newUser);
         await _genericRepository.SaveAll();
@@ -45,6 +52,16 @@ public class UserRepository : IUserRepository
     public async Task<List<UserModel>> GetAll(int pageNumber)
     {
         return await _genericRepository.Get(pageNumber);
+    }
+
+    public async Task<OrderDto> Map(Order model)
+    {
+        return _mapper.Map<OrderDto>(model);
+    }
+
+    public async Task<List<OrderDto>> Map(List<Order> model)
+    {
+        return _mapper.Map<List<OrderDto>>(model);
     }
 
     public async Task<UserModel> GetById(string? id)

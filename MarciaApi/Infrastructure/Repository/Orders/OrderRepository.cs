@@ -18,8 +18,8 @@ public class OrderRepository : IOrderRepository
         _genericRepository = genericRepository;
         _userRepository = userRepository;
         _context = context;
-    }
-
+    } 
+    
     public async Task<List<Order>> Get(int pageNumber)
     {
         return await _genericRepository.Get(pageNumber);
@@ -28,7 +28,7 @@ public class OrderRepository : IOrderRepository
     public async Task<Order> Generate(string id, OrdersViewModel model)
     {
         var userFound = await _userRepository.GetById(id);
-        
+
         var newOrder = new Order
         {
             OrderId = Guid.NewGuid().ToString(),
@@ -39,6 +39,9 @@ public class OrderRepository : IOrderRepository
             UserPhone = model.UserPhone,
             UsersId = userFound.Id
         };
+        
+        model.Location.LocationId = Guid.NewGuid().ToString();
+        model.Location.OrderId = newOrder.OrderId;
         
         userFound.Orders.Add(newOrder);
         _genericRepository.Add(newOrder);

@@ -28,7 +28,7 @@ public class JwtService : IJwtService
         
         foreach (var role in model.Roles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim(ClaimTypes.Role, role.Role));
         }
 
         var claimsIndetity = new ClaimsIdentity(claims);

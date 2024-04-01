@@ -14,5 +14,6 @@ public class AppDbContext : DbContext
     public DbSet<Size> Sizes { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Location> Locations { get; set; }
+    public DbSet<Roles> Roles { get; set; }
     public DbSet<UserModel> Users { get; set; }
 }
