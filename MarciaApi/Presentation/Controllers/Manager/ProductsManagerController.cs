@@ -19,7 +19,17 @@ public class ProductsManagerController
     {
         return new OkObjectResult(new
         {
-            products = _productsRepository.Get(pageNumber)
+            products = await _productsRepository.Get(pageNumber)
+        });
+    }
+    
+    [HttpGet("/Manager/Products/{id}")]
+
+    public async Task<IActionResult> GetById([FromRoute] string id)
+    {
+        return new OkObjectResult(new
+        {
+            product = await _productsRepository.Get(id)
         });
     }
 

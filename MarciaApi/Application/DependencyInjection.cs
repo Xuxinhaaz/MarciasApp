@@ -1,4 +1,7 @@
 using FluentValidation;
+using MarciaApi.Application.Mapping.Items;
+using MarciaApi.Application.Mapping.Orders;
+using MarciaApi.Application.Mapping.Products;
 using MarciaApi.Application.Mapping.User;
 using MarciaApi.Application.Services.Authentication;
 using MarciaApi.Application.Services.Validator;
@@ -13,6 +16,10 @@ using MarciaApi.Infrastructure.Repository.Items;
 using MarciaApi.Infrastructure.Repository.Orders;
 using MarciaApi.Infrastructure.Repository.Products;
 using MarciaApi.Infrastructure.Repository.User;
+using MarciaApi.Presentation.DTOs.Items;
+using MarciaApi.Presentation.DTOs.Orders;
+using MarciaApi.Presentation.DTOs.Products;
+using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.Orders;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,15 +37,17 @@ public static class DependencyInjection
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IItemsRepository, ItemsRepository>();
-        services.AddScoped<IGenericRepository<UserModel>, GenericRepository<UserModel>>();
-        services.AddScoped<IGenericRepository<Order>, GenericRepository<Order>>();
-        services.AddScoped<IGenericRepository<Product>, GenericRepository<Product>>();
-        services.AddScoped<IGenericRepository<Item>, GenericRepository<Item>>();
+        services.AddScoped<IGenericRepository<UserModel, UserModelDto>, GenericRepository<UserModel, UserModelDto>>();
+        services.AddScoped<IGenericRepository<Order, OrderDto>, GenericRepository<Order, OrderDto>>();
+        services.AddScoped<IGenericRepository<Product, ProductDto>, GenericRepository<Product, ProductDto>>();
+        services.AddScoped<IGenericRepository<Item, ItemDto>, GenericRepository<Item, ItemDto>>();
         
         services.AddTransient<IJwtService, JwtService>();
         
         services.AddAutoMapper(typeof(DomainToUserDto));
-        
+        services.AddAutoMapper(typeof(DomainToOrderDto));
+        services.AddAutoMapper(typeof(DomainToProductDto));
+        services.AddAutoMapper(typeof(DomainToItemDto));
         
         return services;
     }

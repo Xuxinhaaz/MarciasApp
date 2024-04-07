@@ -1,11 +1,15 @@
+using System.Linq.Expressions;
+
 namespace MarciaApi.Domain.Repository;
 
-public interface IGenericRepository<T>
+public interface IGenericRepository<T, T2>
 {
-    Task<List<T>> Get(int pageNumber);
-    Task<T> GetByID(string id);
+    Task<List<T>> Get(int pageNumber, params Expression<Func<T, object>>[] includes);
+    Task<T> GetByID(string id, Expression<Func<T, bool>> filter, params Expression<Func<T, object>>[] includes);
     Task Add(T model);
     Task SaveAll();
     Task<bool> Any();
     Task Delete(T model);
+    Task<T2> Map(T model);
+    Task<List<T2>> Map(List<T> model);
 }

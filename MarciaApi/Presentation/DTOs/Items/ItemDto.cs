@@ -1,14 +1,11 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+using MarciaApi.Domain.Models;
 
-namespace MarciaApi.Domain.Models;
+namespace MarciaApi.Presentation.DTOs.Items;
 
-public class Item
+public class ItemDto
 {
-    [Key]
     public string? ItemId { get; set; }
     public string? ItemName { get; set; }
     public double? ItemPrice { get; set; }
-    [JsonIgnore]
     public List<Product>? Products { get; set; } = new();
 }

@@ -41,7 +41,7 @@ public class UsersManagerController
         
         return new OkObjectResult(new
         {
-            users = await _userRepository.GetAll(pageNumber)
+            users = await _userRepository.Get(pageNumber)
         });
     }
     

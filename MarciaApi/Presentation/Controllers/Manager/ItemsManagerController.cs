@@ -22,6 +22,15 @@ public class ItemsManagerController
             items = await _itemsRepository.Get(pageNumber)
         });
     }
+    
+    [HttpGet("/Manager/Items/{id}")]
+    public async Task<IActionResult> GetById([FromRoute] string id)
+    {
+        return new OkObjectResult(new
+        {
+            item = await _itemsRepository.Get(id)
+        });
+    }
 
     [HttpPost("/Manager/Items")]
     public async Task<IActionResult> Post([FromBody] ItemsViewModel viewModel)

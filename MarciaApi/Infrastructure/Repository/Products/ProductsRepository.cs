@@ -2,46 +2,69 @@ using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Domain.Repository.Products;
+using MarciaApi.Presentation.DTOs.Products;
 using MarciaApi.Presentation.ViewModel.Products;
 
 namespace MarciaApi.Infrastructure.Repository.Products;
 
 public class ProductsRepository : IProductsRepository
 {
-    private readonly IGenericRepository<Product> _genericProductRepository;
+    private readonly IGenericRepository<Product, ProductDto> _genericProductRepository;
     private readonly IItemsRepository _itemsRepository;
 
-    public ProductsRepository(IGenericRepository<Product> genericProductRepository, IItemsRepository itemsRepository)
+    public ProductsRepository(IGenericRepository<Product, ProductDto> genericProductRepository, IItemsRepository itemsRepository)
     {
         _genericProductRepository = genericProductRepository;
         _itemsRepository = itemsRepository;
     }
 
-    public async Task<List<Product>> Get(int pageNumber)
+    public async Task<List<ProductDto>> Get(int pageNumber)
     {
-        return await _genericProductRepository.Get(pageNumber);
+        List<Product> products =  await _genericProductRepository.Get(pageNumber,
+            m => m.Orders,
+            m => m.Items,
+            m => m.Sizes
+            );
+        List<ProductDto> dtos = await _genericProductRepository.Map(products);
+
+        return dtos;
     }
 
-    public async Task<Product> Get(string id)
+    public async Task<ProductDto> Get(string id)
     { 
-        return await _genericProductRepository.GetByID(id);
+        Product product = await _genericProductRepository.GetByID(id, m => m.ProdutId == id, 
+            m => m.Items,
+            m => m.Sizes,
+            m => m.Orders
+            );
+        ProductDto dto = await _genericProductRepository.Map(product);
+
+        return dto;
     }
 
-    public async Task<Product> Generate(ProductsViewModel model)
+    public async Task<ProductDto> Generate(ProductsViewModel model)
     {
-        var newProduct = new Product()
+        var itemsNewProduct = await _itemsRepository.GetByName(model.ItemsNames);
+        
+        Product newProduct = new()
         {
-            Sizes = model.Sizes,
-            Items = await _itemsRepository.GetByName(model.ItemsNames),
+            Items = itemsNewProduct,
             ProductDescription = model.Description,
             ProductName = model.Name,
             ProdutId = Guid.NewGuid().ToString(),
             TotalProductPrice = model.Price
         };
         
+        foreach (var item in itemsNewProduct)
+        {
+            item.Products.Add(newProduct);
+        }
+        
+        var dto = await _genericProductRepository.Map(newProduct);
+        
         await _genericProductRepository.Add(newProduct);
         await _genericProductRepository.SaveAll();
         
-        return newProduct;
+        return dto;
     }
 }

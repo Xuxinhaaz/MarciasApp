@@ -4,6 +4,7 @@ using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
 using MarciaApi.Presentation.DTOs.Orders;
+using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,11 @@ namespace MarciaApi.Infrastructure.Repository.User;
 public class UserRepository : IUserRepository
 {
     private readonly IMapper _mapper;
-    private readonly IGenericRepository<UserModel> _genericRepository;
+    private readonly IGenericRepository<UserModel, UserModelDto> _genericRepository;
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
 
-    public UserRepository(IGenericRepository<UserModel> genericRepository, AppDbContext context, IConfiguration configuration, IMapper mapper)
+    public UserRepository(IGenericRepository<UserModel, UserModelDto> genericRepository, AppDbContext context, IConfiguration configuration, IMapper mapper)
     {
         _genericRepository = genericRepository;
         _context = context;
@@ -49,9 +50,12 @@ public class UserRepository : IUserRepository
         return newUser;
     }
 
-    public async Task<List<UserModel>> GetAll(int pageNumber)
+    public async Task<List<UserModelDto>> Get(int pageNumber)
     {
-        return await _genericRepository.Get(pageNumber);
+        List<UserModel> userModels = await _genericRepository.Get(pageNumber);
+        List<UserModelDto> dtos = await _genericRepository.Map(userModels);
+
+        return dtos;
     }
 
     public async Task<OrderDto> Map(Order model)
@@ -64,9 +68,12 @@ public class UserRepository : IUserRepository
         return _mapper.Map<List<OrderDto>>(model);
     }
 
-    public async Task<UserModel> GetById(string? id)
+    public async Task<UserModelDto> Get(string? id)
     {   
-        return await _context.Users.FindAsync(id);
+        UserModel userModel = await _genericRepository.GetByID(id, m => m.Id == id);
+        UserModelDto dto = await _genericRepository.Map(userModel);
+
+        return dto;
     }
 
     public async Task<bool> AnyWithProvidedId(string id)

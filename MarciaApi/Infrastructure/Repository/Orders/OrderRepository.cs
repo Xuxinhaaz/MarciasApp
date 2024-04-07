@@ -3,6 +3,7 @@ using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
+using MarciaApi.Presentation.DTOs.Orders;
 using MarciaApi.Presentation.ViewModel.Orders;
 
 namespace MarciaApi.Infrastructure.Repository.Orders;
@@ -11,23 +12,26 @@ public class OrderRepository : IOrderRepository
 {
     private readonly AppDbContext _context;
     private readonly IUserRepository _userRepository;
-    private readonly IGenericRepository<Order> _genericRepository;
+    private readonly IGenericRepository<Order, OrderDto> _genericRepository;
 
-    public OrderRepository(IGenericRepository<Order> genericRepository, IUserRepository userRepository, AppDbContext context)
+    public OrderRepository(IGenericRepository<Order, OrderDto> genericRepository, IUserRepository userRepository, AppDbContext context)
     {
         _genericRepository = genericRepository;
         _userRepository = userRepository;
         _context = context;
     } 
     
-    public async Task<List<Order>> Get(int pageNumber)
+    public async Task<List<OrderDto>> Get(int pageNumber)
     {
-        return await _genericRepository.Get(pageNumber);
+        List<Order> orders = await _genericRepository.Get(pageNumber);
+        List<OrderDto> dtos = await _genericRepository.Map(orders);
+
+        return dtos;
     }
 
     public async Task<Order> Generate(string id, OrdersViewModel model)
     {
-        var userFound = await _userRepository.GetById(id);
+        var userFound = await _userRepository.Get(id);
 
         var newOrder = new Order
         {

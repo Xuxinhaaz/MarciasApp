@@ -1,25 +1,49 @@
+using System.Linq.Expressions;
+using AutoMapper;
 using MarciaApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarciaApi.Domain.Repository;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T, T2> : IGenericRepository<T, T2> where T : class
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public GenericRepository(AppDbContext context)
+    public GenericRepository(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
-    public async Task<List<T>> Get(int pageNumber)
+    public async Task<List<T>> Get(int pageNumber, params Expression<Func<T, object>>[] includes)
     {
-        return await _context.Set<T>().Skip(pageNumber * 5).Take(5).ToListAsync();
+        IQueryable<T> query = _context.Set<T>();
+
+        foreach (Expression<Func<T, object>> include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        query = query.Skip(pageNumber * 5).Take(5);
+        
+        return await query.ToListAsync();
     }
 
-    public async Task<T> GetByID(string id)
+    public async Task<T> GetByID(string id, 
+        Expression<Func<T, bool>> filter, 
+        params Expression<Func<T, object>>[] includes)
     {
-        return await _context.Set<T>().FindAsync(id);
+        IQueryable<T> query = _context.Set<T>();
+
+        query = query.Where(filter);
+        
+        foreach (Expression<Func<T, object>> include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        return await query.FirstAsync();
     }
 
     public async Task Add(T model)
@@ -40,5 +64,15 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task Delete(T model)
     {
         _context.Set<T>().Remove(model);
+    }
+
+    public async Task<T2> Map(T model)
+    {
+        return _mapper.Map<T2>(model);
+    }
+
+    public async Task<List<T2>> Map(List<T> model)
+    {
+        return _mapper.Map<List<T2>>(model);
     }
 }

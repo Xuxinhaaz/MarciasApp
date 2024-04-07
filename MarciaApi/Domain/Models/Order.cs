@@ -13,7 +13,7 @@ public class Order
     public double? TotalPrice { get; set; }
     public bool? IsPaid { get; set; }
     public string? PaymentType { get; set; }
-    public List<Product>? Products { get; set; }
+    public List<Product>? Products { get; set; } = new();
     public Location? Location { get; set; }
     [ForeignKey("Id")]
     public string? UsersId { get; set; }
