@@ -1,7 +1,7 @@
 using FluentValidation;
 using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+using MarciaApi.Infrastructure.Services.Auth.Authorization;
 using MarciaApi.Presentation.ViewModel.Orders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -16,7 +16,10 @@ public class OrdersController
     private readonly IValidator<OrdersViewModel> _validator;
     private readonly IUserRepository _userRepository;
 
-    public OrdersController(IOrderRepository orderRepository, IAuthorizationService authorizationService, IValidator<OrdersViewModel> validator, IUserRepository userRepository)
+    public OrdersController(IOrderRepository orderRepository, 
+    IAuthorizationService authorizationService, 
+    IValidator<OrdersViewModel> validator,  
+    IUserRepository userRepository)
     {
         _orderRepository = orderRepository;
         _authorizationService = authorizationService;
@@ -24,8 +27,32 @@ public class OrdersController
         _userRepository = userRepository;
     }
 
+    [HttpGet("/Orders/{id}")]
+    public async Task<IActionResult> GetOrders([FromHeader] string Authorization, 
+        [FromRoute] string id,
+        [FromQuery] int pageNumber)
+    {
+        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        if (!auth)
+        {
+            return new UnauthorizedObjectResult(new
+            {
+                errors = new
+                {
+                    message = "cannot access this endpoint"
+                }
+            });
+        }
+
+        return new OkObjectResult(new
+        {
+            Orders = await _orderRepository.GetByUserId(id, pageNumber)
+        });
+    }
+    
     [HttpGet("/Orders")]
-    public async Task<IActionResult> GetOrders([FromHeader] string Authorization, [FromQuery] int pageNumber)
+    public async Task<IActionResult> GetOrders([FromHeader] string Authorization, 
+        [FromQuery] int pageNumber)
     {
         var auth = await _authorizationService.AuthorizeManager(Authorization);
         if (!auth)
@@ -62,12 +89,12 @@ public class OrdersController
             });
         }
         
-        var validationReponse = _validator.Validate(viewModel);
-        if (!validationReponse.IsValid)
+        var validationResponse = _validator.Validate(viewModel);
+        if (!validationResponse.IsValid)
         {
             var errors = new ModelStateDictionary();
 
-            foreach (var error in validationReponse.Errors)
+            foreach (var error in validationResponse.Errors)
             {
                 errors.AddModelError(error.PropertyName, error.ErrorMessage);
             }
@@ -91,12 +118,65 @@ public class OrdersController
         }
 
         var newOrder = await _orderRepository.Generate(id, viewModel);
+        if (newOrder is null)
+        {
+            return new BadRequestObjectResult(new
+            {
+                errors = new
+                {
+                    message = "Um erro desconhecido aconteceu!"
+                }
+            });
+        }
 
         var orderDto = await _userRepository.Map(newOrder);
 
         return new OkObjectResult(new
         {
             order = orderDto
+        });
+    }
+
+    [HttpDelete("/Orders/{id}")]
+    public async Task<IActionResult> DeleteAnOrder([FromHeader] string Authorization, [FromRoute] string id, [FromQuery] string orderId)
+    {
+        var auth = await _authorizationService.Authorize(Authorization);
+        if (!auth)
+        {
+            return new UnauthorizedObjectResult(new
+            {
+                errors = new
+                {
+                    message = "voce não esta autenticado"
+                }
+            });
+        }
+
+        var anyOrderWithProvidedId = await _orderRepository.Any(id, x => x.UsersId == id);
+        if (!anyOrderWithProvidedId)
+        {
+            return new BadRequestObjectResult(new
+            {
+                errors = new
+                {
+                    message = "Não existe um pedido com esse id"
+                }
+            });
+        }
+
+        if(!await _orderRepository.DeleteAnOrderByUserId(id, orderId)) 
+        {
+            return new BadRequestObjectResult(new {
+                errors = new 
+                {
+                    message = "Não foi possível deletar o pedido"
+                }
+            });
+        }
+
+        return new OkObjectResult(new
+        {
+            message = "pedido deletado!"
         });
     }
 }

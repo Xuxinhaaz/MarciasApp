@@ -22,23 +22,6 @@ public class OrderViewModelValidator : AbstractValidator<OrdersViewModel>
             .NotEmpty().WithMessage(notEmpty)
             .MinimumLength(2).WithMessage(MinLength("Tipo de pagamento", 2));
 
-        RuleForEach(m => m.Products).ChildRules(x =>
-        {
-            x.RuleFor(j => j.ProductName)
-                .NotEmpty().WithMessage(notEmpty)
-                .MinimumLength(2).WithMessage(MinLength("Nome do produto", 2))
-                .MaximumLength(60).WithMessage(MaxLength("Nome do produto", 60));
-
-            x.RuleFor(j => j.ProductDescription)
-                .NotEmpty().WithMessage(notEmpty)
-                .MinimumLength(5).WithMessage(MinLength("Descrição do produto", 5))
-                .MaximumLength(100).WithMessage(MaxLength("Descrição do produto", 100));
-            
-        });
-        
-        RuleFor(m => m.Products)
-            .NotEmpty().WithMessage(notEmpty);
-
         RuleFor(m => m.Location).ChildRules(x =>
         {
             x.RuleFor(j => j.CEP)

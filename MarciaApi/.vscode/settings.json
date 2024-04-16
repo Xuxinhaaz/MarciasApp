@@ -5,9 +5,22 @@
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
-    "**/Thumbs.db": true
+    "**/Thumbs.db": true,
+    "bin": true,
+    "obj": true,
+    "Properties": true,
+    ".vscode": true,
+    ".idea": true,
+    "MarciaApi.sln.DotSettings.user": true
   },
-  "hide-files.files": [],
+  "hide-files.files": [
+    "bin",
+    "obj",
+    "Properties",
+    ".vscode",
+    ".idea",
+    "MarciaApi.sln.DotSettings.user"
+  ],
   "editor.fontFamily": "JetBrains Mono",
   "editor.fontSize": 14,
   "editor.lineHeight": 1.8,

@@ -1,7 +1,7 @@
 using MarciaApi.Application.Services.Email;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+using MarciaApi.Infrastructure.Services.Auth.Authorization;
 using MarciaApi.Infrastructure.Services.Authentication;
 using MarciaApi.Infrastructure.Services.Email;
 

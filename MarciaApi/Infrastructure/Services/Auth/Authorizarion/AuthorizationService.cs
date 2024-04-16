@@ -1,6 +1,6 @@
 using MarciaApi.Application.Services.Authentication;
 
-namespace MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+namespace MarciaApi.Infrastructure.Services.Auth.Authorization;
 
 public class AuthorizationService : IAuthorizationService
 {

@@ -1,6 +1,6 @@
 using FluentValidation;
 using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+using MarciaApi.Infrastructure.Services.Auth.Authorization;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.AspNetCore.Mvc;
 

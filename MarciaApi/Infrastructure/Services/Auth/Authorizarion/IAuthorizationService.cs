@@ -1,4 +1,4 @@
-namespace MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+namespace MarciaApi.Infrastructure.Services.Auth.Authorization;
 
 public interface IAuthorizationService
 {

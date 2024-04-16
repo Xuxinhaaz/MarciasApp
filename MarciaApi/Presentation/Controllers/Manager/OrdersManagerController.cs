@@ -1,7 +1,7 @@
 using FluentValidation;
 using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+using MarciaApi.Infrastructure.Services.Auth.Authorization;
 using MarciaApi.Presentation.ViewModel.Orders;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,6 +41,41 @@ public class OrdersManagerController
         return new OkObjectResult(new
         {
             Orders = await _orderRepository.Get(pageNumber)
+        });
+    }
+
+    [HttpDelete("/Manager/Orders/{id}")]
+    public async Task<IActionResult> DeleteAnOrder([FromHeader] string Authorization, [FromRoute] string id)
+    {
+        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        if (!auth)
+        {
+            return new UnauthorizedObjectResult(new
+            {
+                errors = new
+                {
+                    message = "cannot access this endpoint"
+                }
+            });
+        }
+
+        var anyOrderWithProvidedId = await _orderRepository.Any(id, x => x.OrderId == id);
+        if (!anyOrderWithProvidedId)
+        {
+            return new BadRequestObjectResult(new
+            {
+                errors = new
+                {
+                    message = "There's no order with provided id"
+                }
+            });
+        }
+
+        await _orderRepository.Delete(id, x => x.OrderId == id);
+
+        return new OkObjectResult(new
+        {
+            message = "pedido deletado!"
         });
     }
 }
