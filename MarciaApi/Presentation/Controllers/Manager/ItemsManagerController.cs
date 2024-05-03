@@ -1,4 +1,5 @@
 using MarciaApi.Domain.Repository.Items;
+using MarciaApi.Infrastructure.Services.Auth.Authorization;
 using MarciaApi.Presentation.ViewModel.Items;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,11 +8,13 @@ namespace MarciaApi.Presentation.Controllers.Manager;
 [ApiController]
 public class ItemsManagerController
 {
+    private readonly IAuthorizationService _authorizationService;
     private readonly IItemsRepository _itemsRepository;
 
-    public ItemsManagerController(IItemsRepository itemsRepository)
+    public ItemsManagerController(IItemsRepository itemsRepository, IAuthorizationService authorizationService)
     {
         _itemsRepository = itemsRepository;
+        _authorizationService = authorizationService;
     }
 
     [HttpGet("/Manager/Items")]
@@ -24,8 +27,20 @@ public class ItemsManagerController
     }
     
     [HttpGet("/Manager/Items/{id}")]
-    public async Task<IActionResult> GetById([FromRoute] string id)
+    public async Task<IActionResult> GetById([FromHeader] string Authorization, [FromRoute] string id)
     {
+        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        if (!auth)
+        {
+            return new UnauthorizedObjectResult(new
+            {
+                errors = new
+                {
+                    message = "cannot access this endpoint"
+                }
+            });
+        }
+        
         return new OkObjectResult(new
         {
             item = await _itemsRepository.Get(id)
@@ -33,11 +48,23 @@ public class ItemsManagerController
     }
 
     [HttpPost("/Manager/Items")]
-    public async Task<IActionResult> Post([FromBody] ItemsViewModel viewModel)
+    public async Task<IActionResult> Post([FromHeader] string Authorization, [FromBody] ItemsViewModel viewModel)
     {
+        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        if (!auth)
+        {
+            return new UnauthorizedObjectResult(new
+            {
+                errors = new
+                {
+                    message = "cannot access this endpoint"
+                }
+            });
+        }
+        
         var newItem = await _itemsRepository.Generate(viewModel);
 
-        return new OkObjectResult(new
+        return new CreatedAtRouteResult("Items Controller", new
         {
             item = newItem
         });

@@ -12,7 +12,7 @@ namespace MarciaApi.Presentation.Controllers.User;
 public class UsersController : ControllerBase
 {
     private readonly IValidator<UserViewModel> _usersViewModelValidator;
-    private readonly MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService _authenticationService;
+    private readonly Infrastructure.Services.Authentication.IAuthenticationService _authenticationService;
     public UsersController(IValidator<UserViewModel> usersViewModelValidator, 
         MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService authenticationService
         )
@@ -21,7 +21,7 @@ public class UsersController : ControllerBase
         _authenticationService = authenticationService;
     }
         
-    [HttpPost("/Users")]
+    [HttpPost("/Login")]
     public async Task<IActionResult> CreateAnUser([FromBody] UserViewModel viewModel)
     {
         var responseAuth = await _usersViewModelValidator.ValidateAsync(viewModel);

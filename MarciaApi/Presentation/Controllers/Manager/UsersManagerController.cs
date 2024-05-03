@@ -9,16 +9,14 @@ namespace MarciaApi.Presentation.Controllers.Manager;
 [ApiController]
 public class UsersManagerController
 {
-    private readonly IValidator<UserViewModel> _usersViewModelValidator;
     private readonly MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService _authenticationService;
     private readonly IAuthorizationService _authorizationService;
     private readonly IUserRepository _userRepository;
-    public UsersManagerController(IValidator<UserViewModel> usersViewModelValidator, 
+    public UsersManagerController(
         MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService authenticationService, 
         IAuthorizationService authorizationService, 
         IUserRepository userRepository)
     {
-        _usersViewModelValidator = usersViewModelValidator;
         _authenticationService = authenticationService;
         _authorizationService = authorizationService;
         _userRepository = userRepository;
@@ -60,7 +58,7 @@ public class UsersManagerController
             });
         }
 
-        var anyWithProvidedId = await _userRepository.AnyWithProvidedId(id);
+        var anyWithProvidedId = await _userRepository.Any(x => x.Id == id);
         if (!anyWithProvidedId)
         {
             return new NotFoundObjectResult(new
@@ -72,7 +70,7 @@ public class UsersManagerController
             });
         }
 
-        await _userRepository.DeleteById(id);
+        await _userRepository.Delete(x => x.Id == id);
 
         return new OkObjectResult(new
         {

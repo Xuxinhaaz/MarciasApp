@@ -16,28 +16,30 @@ public class GenericRepository<T, T2> : IGenericRepository<T, T2> where T : clas
         _mapper = mapper;
     }
 
-    public async Task<List<T>> Get(int pageNumber, params Expression<Func<T, object>>[] includes)
-    {
-        IQueryable<T> query = _context.Set<T>();
-
-        foreach (Expression<Func<T, object>> include in includes)
-        {
-            query = query.Include(include);
-        }
-
-        query = query.Skip(pageNumber * 5).Take(5);
-        
-        return await query.ToListAsync();
-    }
-
-    public async Task<List<T>> Get(string id, 
-        int pageNumber,
-        Expression<Func<T, bool>> filter, 
+    public async Task<List<T>> Get(
+        int pageNumber, 
         params Expression<Func<T, object>>[] includes)
     {
         IQueryable<T> query = _context.Set<T>();
 
-        query.Where(filter);
+        foreach (Expression<Func<T, object>> include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        query = query.Skip(pageNumber * 5).Take(5);
+        
+        return await query.ToListAsync();
+    }
+
+    public async Task<List<T>> Get(
+        int pageNumber,
+        Expression<Func<T, bool>> filter = null, 
+        params Expression<Func<T, object>>[] includes)
+    {
+        IQueryable<T> query = _context.Set<T>();
+
+        if(filter != null) query.Where(filter);
         
         foreach (Expression<Func<T, object>> include in includes)
         {
@@ -49,7 +51,7 @@ public class GenericRepository<T, T2> : IGenericRepository<T, T2> where T : clas
         return await query.ToListAsync();
     }
 
-    public async Task<T> GetByID(string id, 
+    public async Task<T> Get(
         Expression<Func<T, bool>> filter, 
         params Expression<Func<T, object>>[] includes)
     {
@@ -99,12 +101,24 @@ public class GenericRepository<T, T2> : IGenericRepository<T, T2> where T : clas
         return _mapper.Map<List<T2>>(model);
     }
 
-    public async Task DeleteAnEntity(T model)
+    public async Task Delete(Expression<Func<T, bool>> filter = null, params Expression<Func<T, object>>[] includes)
     {
-        _context.Set<T>().Remove(model);
+        IQueryable<T> query = _context.Set<T>();
+
+        if(filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        foreach (Expression<Func<T, object>> include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        _context.Set<T>().Remove(await query.FirstAsync());
     }
 
-    public async Task DeleteEntities(List<T> model)
+    public async Task Delete(List<T> model)
     {
         _context.Set<T>().RemoveRange(model);
     }

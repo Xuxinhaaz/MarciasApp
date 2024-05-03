@@ -32,10 +32,9 @@ public class ItemsRepository : IItemsRepository
 
     public async Task<ItemDto> Get(string id)
     {
-        Item item = await _genericRepository.GetByID(id, 
+        Item item = await _genericRepository.Get(
             m => m.ItemId == id,
-            m => m.Products
-            );
+            m => m.Products);
         ItemDto dto = await _genericRepository.Map(item);
         
         return dto;
@@ -62,7 +61,9 @@ public class ItemsRepository : IItemsRepository
         
         foreach (var item in ItemsNames)
         {
-            foundItems.Add(await _context.Items.FirstAsync(m => m.ItemName == item));
+            foundItems.Add(
+                await _genericRepository.Get(x => x.ItemName == item,
+                x => x.Products));
         }
 
         return foundItems;

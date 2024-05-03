@@ -11,5 +11,6 @@ public interface IProductsRepository
     Task<ProductDto> Get(string id);
     Task<ProductDto> Generate(ProductsViewModel model);
     Task<bool> Any(Expression<Func<Product, bool>> filter);
+    Task<bool> Any();
     Task<List<Product>> GetByName(List<string> ProductsNames);
 }

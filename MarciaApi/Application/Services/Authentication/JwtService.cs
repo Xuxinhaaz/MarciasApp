@@ -98,15 +98,16 @@ public class JwtService : IJwtService
         try
         {
             var validationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
-            
-            var claimsIdentity = validationResult.ClaimsIdentity;
-            if (!claimsIdentity.HasClaim(ClaimTypes.Role, "Manager"))
+
+            if (validationResult.IsValid)
             {
-                _logger.LogError("User tried to access protected endpoint!");
-                return false;
+                var claimsIdentity = validationResult.ClaimsIdentity;
+                if (claimsIdentity.HasClaim(ClaimTypes.Role, "Manager")) return validationResult.IsValid;
             }
             
-            return validationResult.IsValid;
+            _logger.LogError("User tried to access protected endpoint!");
+            return false;
+
         }
         catch (SecurityTokenException ex)
         {

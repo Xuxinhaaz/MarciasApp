@@ -1,9 +1,13 @@
+using System.Linq.Expressions;
 using AutoMapper;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
+using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
+using MarciaApi.Presentation.Controllers.Manager;
 using MarciaApi.Presentation.DTOs.Orders;
+using MarciaApi.Presentation.DTOs.Roles;
 using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.EntityFrameworkCore;
@@ -14,35 +18,37 @@ public class UserRepository : IUserRepository
 {
     private readonly IMapper _mapper;
     private readonly IGenericRepository<UserModel, UserModelDto> _genericRepository;
-    private readonly AppDbContext _context;
+    private readonly IGenericRepository<Roles, RolesDto> _genericRoleRepository;
     private readonly IConfiguration _configuration;
 
-    public UserRepository(IGenericRepository<UserModel, UserModelDto> genericRepository, AppDbContext context, IConfiguration configuration, IMapper mapper)
+    public UserRepository(
+        IGenericRepository<UserModel, UserModelDto> genericRepository, 
+        IGenericRepository<Roles, RolesDto> genericRoleRepository,
+        IConfiguration configuration, 
+        IMapper mapper)
     {
+        _genericRoleRepository = genericRoleRepository;
         _genericRepository = genericRepository;
-        _context = context;
         _configuration = configuration;
         _mapper = mapper;
     }
 
     public async Task<UserModel> Generate(UserViewModel model)
     {
-        var ClientRole = await _context.Roles.FirstAsync(x => x.Role == "Client");
+        var ClientRole = await _genericRoleRepository.Get(x => x.Role == "Client");
         
         var newUser =  new UserModel()
         {
             Id = Guid.NewGuid().ToString(),
             Email = model.Email,
         };
-       
+
         newUser.Roles.Add(ClientRole);
 
         if (model.Email == _configuration["ManagerEmail"])
         {
-            newUser.Roles.Add(await _context.Roles.FirstAsync(x => x.Role == "Manager"));
+            newUser.Roles.Add(await _genericRoleRepository.Get(x => x.Role == "Manager"));
         }
-        
-        
 
         await _genericRepository.Add(newUser);
         await _genericRepository.SaveAll();
@@ -58,46 +64,34 @@ public class UserRepository : IUserRepository
         return dtos;
     }
 
-    public async Task<OrderDto> Map(Order model)
-    {
-        return _mapper.Map<OrderDto>(model);
-    }
-
-    public async Task<List<OrderDto>> Map(List<Order> model)
-    {
-        return _mapper.Map<List<OrderDto>>(model);
-    }
-
     public async Task<UserModelDto> Get(string? id)
     {   
-        UserModel userModel = await _genericRepository.GetByID(id, m => m.Id == id);
+        UserModel userModel = await _genericRepository.Get(m => m.Id == id);
         UserModelDto dto = await _genericRepository.Map(userModel);
 
         return dto;
     }
 
-    public async Task<bool> AnyWithProvidedId(string id)
+    public async Task<bool> Any(Expression<Func<UserModel, bool>> filter)
     {
-        return await _context.Users.AnyAsync(x => x.Id == id);
+        return await _genericRepository.Any(filter);
     }
 
-    public async Task<bool> AnyUserWithSameEmailProvided(string email)
+    public async Task<UserModel> Find(Expression<Func<UserModel, bool>> filter)
     {
-        return await _context.Users.AnyAsync(x => x.Email == email);
+        return await _genericRepository.Get(filter);
     }
 
-    public async Task<UserModel> FindByEmailAsync(string email)
+    public async Task Delete(
+        Expression<Func<UserModel, bool>> filter = null, 
+        params Expression<Func<UserModel, object>>[] includes)
     {
-        return await _context.Users.FirstAsync(x => x.Email == email);
+        await _genericRepository.Delete(filter, includes);
     }
 
-    public async Task DeleteById(string id)
+    public async Task Delete(UserModel model)
     {
-        var userFound = await _context.Users
-            .Include(x => x.Orders)
-            .FirstAsync(x => x.Id == id);
-
-        await _genericRepository.Delete(userFound);
+        await _genericRepository.Delete(model);
         await _genericRepository.SaveAll();
     }
 }

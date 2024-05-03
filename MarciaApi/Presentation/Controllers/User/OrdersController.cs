@@ -46,7 +46,7 @@ public class OrdersController
 
         return new OkObjectResult(new
         {
-            Orders = await _orderRepository.GetByUserId(id, pageNumber)
+            Orders = await _orderRepository.Get(pageNumber, null)
         });
     }
     
@@ -68,7 +68,7 @@ public class OrdersController
 
         return new OkObjectResult(new
         {
-            Orders = await _orderRepository.Get(pageNumber)
+            Orders = await _orderRepository.Get(pageNumber, null)
         });
     }
 
@@ -105,7 +105,7 @@ public class OrdersController
             });
         }
 
-        var anyWithProvidedId = await _userRepository.AnyWithProvidedId(id);
+        var anyWithProvidedId = await _userRepository.Any(x => x.Id == id);
         if (!anyWithProvidedId)
         {
             return new NotFoundObjectResult(new
@@ -129,11 +129,9 @@ public class OrdersController
             });
         }
 
-        var orderDto = await _userRepository.Map(newOrder);
-
         return new OkObjectResult(new
         {
-            order = orderDto
+            order = newOrder
         });
     }
 
@@ -152,14 +150,14 @@ public class OrdersController
             });
         }
 
-        var anyOrderWithProvidedId = await _orderRepository.Any(id, x => x.UsersId == id);
+        var anyOrderWithProvidedId = await _orderRepository.Any(x => x.UsersId == id);
         if (!anyOrderWithProvidedId)
         {
             return new BadRequestObjectResult(new
             {
                 errors = new
                 {
-                    message = "Não existe um pedido com esse id"
+                    message = "Voce não tem nenhum pedido"
                 }
             });
         }

@@ -40,7 +40,7 @@ public class OrdersManagerController
 
         return new OkObjectResult(new
         {
-            Orders = await _orderRepository.Get(pageNumber)
+            Orders = await _orderRepository.Get(pageNumber, null)
         });
     }
 
@@ -59,7 +59,7 @@ public class OrdersManagerController
             });
         }
 
-        var anyOrderWithProvidedId = await _orderRepository.Any(id, x => x.OrderId == id);
+        var anyOrderWithProvidedId = await _orderRepository.Any(x => x.OrderId == id);
         if (!anyOrderWithProvidedId)
         {
             return new BadRequestObjectResult(new
@@ -71,7 +71,7 @@ public class OrdersManagerController
             });
         }
 
-        await _orderRepository.Delete(id, x => x.OrderId == id);
+        await _orderRepository.Delete(x => x.OrderId == id);
 
         return new OkObjectResult(new
         {

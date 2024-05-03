@@ -33,11 +33,11 @@ public class ProductsRepository : IProductsRepository
 
     public async Task<ProductDto> Get(string id)
     { 
-        Product product = await _genericProductRepository.GetByID(id, m => m.ProdutId == id, 
+        Product product = await _genericProductRepository.Get(
+            m => m.ProdutId == id, 
             m => m.Items,
             m => m.Sizes,
-            m => m.Orders
-            );
+            m => m.Orders);
         ProductDto dto = await _genericProductRepository.Map(product);
 
         return dto;
@@ -77,7 +77,7 @@ public class ProductsRepository : IProductsRepository
 
         foreach (var name in ProductsNames)
         {
-            products.Add(await _genericProductRepository.GetByID(name, x => x.ProductName == name));
+            products.Add(await _genericProductRepository.Get(x => x.ProductName == name));
         }
         
         return products;
@@ -86,5 +86,10 @@ public class ProductsRepository : IProductsRepository
     public async Task<bool> Any(Expression<Func<Product, bool>> filter)
     {
         return await _genericProductRepository.Any(filter);
+    }
+    
+    public async Task<bool> Any()
+    {
+        return await _genericProductRepository.Any();
     }
 }

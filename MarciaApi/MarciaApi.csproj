@@ -17,12 +17,21 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
       <PackageReference Include="MimeKit" Version="4.4.0" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-preview.1" />
+      <PackageReference Include="xunit.extensibility.core" Version="2.4.2" />
     </ItemGroup>
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="MarciaBrunoRest\bruno.json" />
+      <_ContentIncludedByDefault Remove="MarciaApi.Tests\obj\MarciaApi.Tests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="MarciaApi.Tests\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="MarciaApi.Tests\obj\project.packagespec.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Application\Validator\Items\" />
     </ItemGroup>
 
 </Project>

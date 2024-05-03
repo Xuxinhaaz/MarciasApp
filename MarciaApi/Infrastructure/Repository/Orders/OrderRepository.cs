@@ -26,17 +26,20 @@ public class OrderRepository : IOrderRepository
         _productsRepository = productsRepository;
     } 
     
-    public async Task<List<OrderDto>> Get(int pageNumber)
+    public async Task<OrderDto> Get(Expression<Func<Order, bool>> filter)
     {
-        List<Order> orders = await _genericRepository.Get(pageNumber);
-        List<OrderDto> dtos = await _genericRepository.Map(orders);
+        Order orders = await _genericRepository.Get(filter);
+        OrderDto dto = await _genericRepository.Map(orders);
 
-        return dtos;
+        return dto;
     }
 
-    public async Task<List<OrderDto>> GetByUserId(string id, int pageNumber)
+    public async Task<List<OrderDto>> Get(
+        int pageNumber, 
+        Expression<Func<Order, bool>> filter = null, 
+        params Expression<Func<Order, object>>[] includes)
     {
-        var orders = await _genericRepository.Get(id, pageNumber,m => m.UsersId == id);
+        var orders = await _genericRepository.Get(pageNumber, filter, includes);
         var dtos = await _genericRepository.Map(orders);
 
         return dtos;
@@ -80,28 +83,28 @@ public class OrderRepository : IOrderRepository
         return newOrder;
     }   
 
-    public async Task Delete(string id, Expression<Func<Order, bool>> filter)
+    public async Task Delete(Expression<Func<Order, bool>> filter)
     {
-        var orderFound = await _genericRepository.GetByID(id, filter);
+        var orderFound = await _genericRepository.Get(filter);
 
-        await _genericRepository.DeleteAnEntity(orderFound);
+        await _genericRepository.Delete(orderFound);
     }
 
     public async Task<bool> DeleteAnOrderByUserId(string userId, string orderId)
     {
         var userFound = await _userRepository.Get(userId);
-        var orderFound = await _genericRepository.GetByID(orderId, x => x.OrderId == orderId);
+        var orderFound = await _genericRepository.Get(x => x.OrderId == orderId);
         
         if(userFound.Id != orderFound.UsersId) return false; 
 
-        await _genericRepository.DeleteAnEntity(orderFound);
+        await _genericRepository.Delete(orderFound);
 
         return true;
     }
 
-    public async Task<bool> Any(string id, Expression<Func<Order, bool>> filter)
+    public async Task<bool> Any(Expression<Func<Order, bool>> filter)
     {
-        return await _genericRepository.Any(x => x.OrderId == id);
+        return await _genericRepository.Any(filter);
     }
 
 }

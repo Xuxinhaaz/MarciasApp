@@ -29,7 +29,7 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            var anyUserSignedUp = await _userRepository.AnyUserWithSameEmailProvided(model.Email);
+            var anyUserSignedUp = await _userRepository.Any(x => x.Email == model.Email);
 
             if (anyUserSignedUp)
             {
@@ -37,7 +37,7 @@ public class AuthenticationService : IAuthenticationService
                     "Marmitaria da Marcia",
                     "caio's Dick is the smallest i've ever seen!!!!!");
 
-                var userFound = await _userRepository.FindByEmailAsync(model.Email);
+                var userFound = await _userRepository.Find(x => x.Email == model.Email);
                 var tokenJwt = await _jwtService.Generate(userFound);
                 
                 var userFoundDto = _mapper.Map<UserModelDto>(userFound);

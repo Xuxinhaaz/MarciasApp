@@ -2,16 +2,21 @@ using System.Text;
 using MarciaApi.Application;
 using MarciaApi.Infrastructure;
 using MarciaApi.Infrastructure.Data;
+using MarciaApi.Infrastructure.Data.Seeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(x => 
     x.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+
+builder.Services.AddTransient<DataSeeder>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -37,6 +42,20 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
 var app = builder.Build();
+
+if (args.Length == 1 && args[0].ToLower() == "seedata")
+    SeedData(app);
+
+void SeedData(IHost app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<DataSeeder>();
+        service.Seed();
+    }
+}
 
 app.UseRouting();
 app.MapControllers();
