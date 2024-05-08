@@ -18,8 +18,20 @@ public class ItemsManagerController
     }
 
     [HttpGet("/Manager/Items")]
-    public async Task<IActionResult> Get([FromQuery] int pageNumber)
+    public async Task<IActionResult> Get([FromHeader] string Authorization, [FromQuery] int pageNumber)
     {
+        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        if (!auth)
+        {
+            return new UnauthorizedObjectResult(new
+            {
+                errors = new
+                {
+                    message = "cannot access this endpoint"
+                }
+            });
+        }
+        
         return new OkObjectResult(new
         {
             items = await _itemsRepository.Get(pageNumber)
@@ -36,7 +48,18 @@ public class ItemsManagerController
             {
                 errors = new
                 {
-                    message = "cannot access this endpoint"
+                    message = "você não pode acessar este endpoint!"
+                }
+            });
+        }
+
+        if (!await _itemsRepository.Any(x => x.ItemId == id))
+        {
+            return new BadRequestObjectResult(new
+            {
+                errors = new
+                {
+                    message = "Este item não está registrado no sistema!"
                 }
             });
         }

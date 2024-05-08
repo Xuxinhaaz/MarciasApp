@@ -66,7 +66,7 @@ public class OrdersManagerController
             {
                 errors = new
                 {
-                    message = "There's no order with provided id"
+                    message = "Não há este pedido registrado no sistema!"
                 }
             });
         }

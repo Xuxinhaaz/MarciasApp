@@ -12,7 +12,7 @@ public interface IUserRepository
     Task<List<UserModelDto>> Get(int pageNumber);
     Task<UserModelDto> Get(string id);
     Task<bool> Any(Expression<Func<UserModel, bool>> filter);
-    Task<UserModel> Find(Expression<Func<UserModel, bool>> filter);
+    Task<UserModel> Get(Expression<Func<UserModel, bool>> filter, params Expression<Func<UserModel, object>>[] includes);
 
     Task Delete(UserModel model);
     Task Delete(

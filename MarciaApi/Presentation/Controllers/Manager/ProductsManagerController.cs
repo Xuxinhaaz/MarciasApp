@@ -1,3 +1,4 @@
+using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Infrastructure.Services.Auth.Authorization;
 using MarciaApi.Presentation.ViewModel.Products;
@@ -10,11 +11,13 @@ public class ProductsManagerController
 {
     private readonly IProductsRepository _productsRepository;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IItemsRepository _itemsRepository;
 
-    public ProductsManagerController(IProductsRepository productsRepository, IAuthorizationService authorizationService)
+    public ProductsManagerController(IProductsRepository productsRepository, IAuthorizationService authorizationService, IItemsRepository itemsRepository)
     {
         _productsRepository = productsRepository;
         _authorizationService = authorizationService;
+        _itemsRepository = itemsRepository;
     }
 
     [HttpGet("/Manager/Products")]
@@ -105,19 +108,36 @@ public class ProductsManagerController
             });
         }
 
-        var anyProducts = await _productsRepository.Any(x => x.ProductName == viewModel.Name); 
-        if (!anyProducts)
+        var anyProducts = await _productsRepository.Any(x => x.ProductName.ToLower() == viewModel.Name.ToLower()); 
+        if (anyProducts)
         {
             return new BadRequestObjectResult(new
             {
                 errors = new
                 {
-                    message = "Não há produtos registrados."
+                    message = "já existe um produto com o mesmo nome cadastrado!"
                 }
             });
         }
+
+        foreach (var itemsName in viewModel.ItemsNames)
+        {
+            var anyItem = await _itemsRepository.Any(x => x.ItemName.ToLower() == itemsName.ToLower());
+            if (!anyItem)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    errors = new
+                    {
+                        message = $"o produto: {itemsName} não está cadastrado no sistema!"
+                    }
+                });
+            }
+        }
+
+        var items = await _itemsRepository.GetByName(viewModel.ItemsNames);
         
-        var newProduct = await _productsRepository.Generate(viewModel);
+        var newProduct = await _productsRepository.Generate(viewModel, items);
 
         return new CreatedAtRouteResult("Products Controller", new
         {

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Items;
@@ -62,7 +63,7 @@ public class ItemsRepository : IItemsRepository
         foreach (var item in ItemsNames)
         {
             foundItems.Add(
-                await _genericRepository.Get(x => x.ItemName == item,
+                await _genericRepository.Get(x => x.ItemName.ToUpper() == item.ToUpper(),
                 x => x.Products));
         }
 
@@ -82,5 +83,15 @@ public class ItemsRepository : IItemsRepository
     public async Task Add(Item item)
     {
         await _genericRepository.Add(item);
+    }
+
+    public async Task<bool> Any(Expression<Func<Item, bool>> filter)
+    {
+        return await _genericRepository.Any(filter);
+    }
+
+    public async Task<bool> Any()
+    {
+        return await _genericRepository.Any();
     }
 }

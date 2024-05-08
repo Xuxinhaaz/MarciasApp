@@ -3,6 +3,7 @@ using AutoMapper;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Orders;
+using MarciaApi.Domain.Repository.RoleRepo;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
 using MarciaApi.Presentation.Controllers.Manager;
@@ -19,23 +20,26 @@ public class UserRepository : IUserRepository
     private readonly IMapper _mapper;
     private readonly IGenericRepository<UserModel, UserModelDto> _genericRepository;
     private readonly IGenericRepository<Roles, RolesDto> _genericRoleRepository;
+    private readonly IRoleRepository _roleRepository;
     private readonly IConfiguration _configuration;
 
     public UserRepository(
         IGenericRepository<UserModel, UserModelDto> genericRepository, 
         IGenericRepository<Roles, RolesDto> genericRoleRepository,
         IConfiguration configuration, 
-        IMapper mapper)
+        IMapper mapper, IRoleRepository roleRepository)
     {
         _genericRoleRepository = genericRoleRepository;
         _genericRepository = genericRepository;
         _configuration = configuration;
         _mapper = mapper;
+        _roleRepository = roleRepository;
     }
 
     public async Task<UserModel> Generate(UserViewModel model)
     {
         var ClientRole = await _genericRoleRepository.Get(x => x.Role == "Client");
+        Console.WriteLine(ClientRole);
         
         var newUser =  new UserModel()
         {
@@ -48,8 +52,11 @@ public class UserRepository : IUserRepository
         if (model.Email == _configuration["ManagerEmail"])
         {
             newUser.Roles.Add(await _genericRoleRepository.Get(x => x.Role == "Manager"));
+            await _roleRepository.AddUser(newUser, x => x.Role == "Manager");
         }
 
+        await _roleRepository.AddUser(newUser, x => x.Role == "Client");
+        
         await _genericRepository.Add(newUser);
         await _genericRepository.SaveAll();
 
@@ -77,9 +84,9 @@ public class UserRepository : IUserRepository
         return await _genericRepository.Any(filter);
     }
 
-    public async Task<UserModel> Find(Expression<Func<UserModel, bool>> filter)
+    public async Task<UserModel> Get(Expression<Func<UserModel, bool>> filter, Expression<Func<UserModel, object>>[] includes)
     {
-        return await _genericRepository.Get(filter);
+        return await _genericRepository.Get(filter, includes);
     }
 
     public async Task Delete(

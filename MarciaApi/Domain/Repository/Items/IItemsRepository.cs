@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using MarciaApi.Domain.Models;
 using MarciaApi.Presentation.DTOs.Items;
 using MarciaApi.Presentation.ViewModel.Items;
@@ -11,4 +12,6 @@ public interface IItemsRepository
     Task<Item> Generate(ItemsViewModel model);
     Task<List<Item>> GetByName(List<string>? ItemsNames);
     Task Add(Item item);
+    Task<bool> Any(Expression<Func<Item, bool>> filter);
+    Task<bool> Any();
 }

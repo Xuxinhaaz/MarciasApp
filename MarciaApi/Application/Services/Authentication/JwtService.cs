@@ -102,7 +102,7 @@ public class JwtService : IJwtService
             if (validationResult.IsValid)
             {
                 var claimsIdentity = validationResult.ClaimsIdentity;
-                if (claimsIdentity.HasClaim(ClaimTypes.Role, "Manager")) return validationResult.IsValid;
+                if (claimsIdentity.HasClaim(ClaimTypes.Role, "Manager")) return true;
             }
             
             _logger.LogError("User tried to access protected endpoint!");

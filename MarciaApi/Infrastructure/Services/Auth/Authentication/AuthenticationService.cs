@@ -33,11 +33,13 @@ public class AuthenticationService : IAuthenticationService
 
             if (anyUserSignedUp)
             {
+                Console.WriteLine("Passei aqui");
+                
                 await _emailSender.SendEmailAsync(model.Email, 
                     "Marmitaria da Marcia",
                     "caio's Dick is the smallest i've ever seen!!!!!");
 
-                var userFound = await _userRepository.Find(x => x.Email == model.Email);
+                var userFound = await _userRepository.Get(x => x.Email == model.Email, x => x.Roles);
                 var tokenJwt = await _jwtService.Generate(userFound);
                 
                 var userFoundDto = _mapper.Map<UserModelDto>(userFound);

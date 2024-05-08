@@ -43,20 +43,18 @@ public class ProductsRepository : IProductsRepository
         return dto;
     }
 
-    public async Task<ProductDto> Generate(ProductsViewModel model)
+    public async Task<ProductDto> Generate(ProductsViewModel model, List<Item> items)
     {
-        var itemsNewProduct = await _itemsRepository.GetByName(model.ItemsNames);
-        
         Product newProduct = new()
         {
-            Items = itemsNewProduct,
+            Items = items,
             ProductDescription = model.Description,
             ProductName = model.Name,
             ProdutId = Guid.NewGuid().ToString(),
             TotalProductPrice = model.Price
         };
         
-        foreach (var item in itemsNewProduct)
+        foreach (var item in items)
         {
             item.Products.Add(newProduct);
         }
