@@ -15,4 +15,5 @@ public class OrderDto
     public List<Product>? Products { get; set; }
     public Location? Location { get; set; }
     public string? UsersId { get; set; }
+    public List<Item>? RemovedItems { get; set; }
 }

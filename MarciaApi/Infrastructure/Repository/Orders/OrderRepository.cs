@@ -6,7 +6,9 @@ using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
+using MarciaApi.Presentation.DTOs.Items;
 using MarciaApi.Presentation.DTOs.Orders;
+using MarciaApi.Presentation.DTOs.Products;
 using MarciaApi.Presentation.ViewModel.Orders;
 
 namespace MarciaApi.Infrastructure.Repository.Orders;
@@ -15,15 +17,21 @@ public class OrderRepository : IOrderRepository
 {
     private readonly AppDbContext _context;
     private readonly IUserRepository _userRepository;
-    private readonly IProductsRepository _productsRepository;
+    private readonly IGenericRepository<Product, ProductDto> _productsGenericReporitory;
     private readonly IGenericRepository<Order, OrderDto> _genericRepository;
+    private readonly IGenericRepository<Item, ItemDto> _genericItemRepository;
 
-    public OrderRepository(IGenericRepository<Order, OrderDto> genericRepository, IUserRepository userRepository, AppDbContext context, IProductsRepository productsRepository)
+    public OrderRepository(
+        IGenericRepository<Order, OrderDto> genericRepository, 
+        IUserRepository userRepository,
+        AppDbContext context, 
+        IGenericRepository<Product, ProductDto> productsGenericReporitory, IGenericRepository<Item, ItemDto> genericItemRepository)
     {
         _genericRepository = genericRepository;
         _userRepository = userRepository;
         _context = context;
-        _productsRepository = productsRepository;
+        _productsGenericReporitory = productsGenericReporitory;
+        _genericItemRepository = genericItemRepository;
     } 
     
     public async Task<OrderDto> Get(Expression<Func<Order, bool>> filter)
@@ -45,42 +53,39 @@ public class OrderRepository : IOrderRepository
         return dtos;
     }
 
-    public async Task<Order?> Generate(string id, OrdersViewModel model)
+    public async Task<OrderDto> Generate(string id, OrdersViewModel model)
     {
         var userFound = await _userRepository.Get(id);
-
-        foreach (var item in model.ProductsNames)
-        {
-            Console.WriteLine(item);
-            if(!await _productsRepository.Any(x => x.ProductName == item)) return null; 
-        }
-        var productsFound = await _productsRepository.GetByName(model.ProductsNames);
+        (double? finalPrice, List<Item>? RemovedItems, List<Product> products) valueTuple = await CalculatingPrice(model);
         
         var newOrder = new Order
         {
             OrderId = Guid.NewGuid().ToString(),
             Location = model.Location,
             IsPaid = false,
-            Products = productsFound,
             UserName = model.UserName,
             UserPhone = model.UserPhone,
             PaymentType = model.PaymentType,
-            UsersId = userFound.Id
+            TotalPrice = valueTuple.finalPrice,
+            UsersId = userFound.Id,
+            RemovedItems = valueTuple.RemovedItems,
+            Products = valueTuple.products,
+            OrderDate = DateTime.UtcNow
         };
 
-        model.Location.LocationId = Guid.NewGuid().ToString();
-        model.Location.OrderId = newOrder.OrderId;
-        
-        foreach (var product in productsFound)
+        if (model.Location != null)
         {
-            product.Orders.Add(newOrder);
+            model.Location.LocationId = Guid.NewGuid().ToString();
+            model.Location.OrderId = newOrder.OrderId;
         }
-        
-        userFound.Orders.Add(newOrder);
-        _genericRepository.Add(newOrder);
+
+        userFound.Orders?.Add(newOrder);
+        await _genericRepository.Add(newOrder);
         await _context.SaveChangesAsync();
+
+        var orderDto = await _genericRepository.Map(newOrder);
         
-        return newOrder;
+        return orderDto;
     }   
 
     public async Task Delete(Expression<Func<Order, bool>> filter)
@@ -107,4 +112,39 @@ public class OrderRepository : IOrderRepository
         return await _genericRepository.Any(filter);
     }
 
+    public async Task<(double? finalPrice, List<Item>? RemovedItems, List<Product> products)> CalculatingPrice(OrdersViewModel model)
+    {
+        double? finalPrice = 0;
+        List<Item>? removedItems = new();
+        List<Product>? products = new();
+            
+        foreach (var product in model.Products)
+        {
+            var productFound = await _productsGenericReporitory.Get(x => x.ProductName == product.Name);
+            foreach (var productFromModel in model.Products)
+            {
+                finalPrice += productFound.TotalProductPrice;
+                foreach (var item in productFromModel.Items)
+                {
+                    var itemFound = await _genericItemRepository.Get(x => x.ItemName == item.Name);
+
+                    
+                    if (item.IsRemoved)
+                    {
+                        removedItems.Add(itemFound);
+                    }
+
+                    if (item.AddItem)
+                    {
+                        finalPrice += itemFound.ItemPrice;
+                    }
+                }
+            }
+            
+            products.Add(productFound);
+        }
+
+        
+        return (finalPrice, removedItems, products);
+    }
 }

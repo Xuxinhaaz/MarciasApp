@@ -19,5 +19,7 @@ public class Order
     public Location? Location { get; set; }
     [ForeignKey("Id")]
     public string? UsersId { get; set; }
+
+    public List<Item>? RemovedItems { get; set; }
   
 }
