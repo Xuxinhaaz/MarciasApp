@@ -121,13 +121,14 @@ public class OrderRepository : IOrderRepository
         foreach (var product in model.Products)
         {
             var productFound = await _productsGenericReporitory.Get(x => x.ProductName == product.Name);
+            
             foreach (var productFromModel in model.Products)
             {
-                finalPrice += productFound.TotalProductPrice;
+                finalPrice += productFound.TotalProductPrice * productFromModel.Quantity;
+                
                 foreach (var item in productFromModel.Items)
                 {
                     var itemFound = await _genericItemRepository.Get(x => x.ItemName == item.Name);
-
                     
                     if (item.IsRemoved)
                     {
@@ -138,7 +139,9 @@ public class OrderRepository : IOrderRepository
                     {
                         finalPrice += itemFound.ItemPrice;
                     }
+
                 }
+                
             }
             
             products.Add(productFound);

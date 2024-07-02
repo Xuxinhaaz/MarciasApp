@@ -186,8 +186,8 @@ public class OrdersController
             });
         }
 
-        var anyOrderWithProvidedId = await _orderRepository.Any(x => x.UsersId == id);
-        if (!anyOrderWithProvidedId)
+        var anyUserWithProvidedId = await _orderRepository.Any(x => x.UsersId == id);
+        if (!anyUserWithProvidedId)
         {
             return new BadRequestObjectResult(new
             {
@@ -197,6 +197,15 @@ public class OrdersController
                 }
             });
         }
+
+        var doesOrderExists = await _orderRepository.Any(x => x.OrderId == orderId);
+        if(!doesOrderExists) return new BadRequestObjectResult(new
+        {
+            errors = new
+            {
+                message = "Este pedido não existe!"
+            }
+        });
 
         if(!await _orderRepository.DeleteAnOrderByUserId(id, orderId)) 
         {

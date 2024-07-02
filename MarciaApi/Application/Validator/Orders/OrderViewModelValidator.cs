@@ -49,7 +49,25 @@ public class OrderViewModelValidator : AbstractValidator<OrdersViewModel>
                 .MaximumLength(50).WithMessage(MaxLength("Locagradouro", 50));
         })
         .NotEmpty().WithMessage(notEmpty);
+
+        RuleForEach(x => x.Products).ChildRules(x =>
+        {
+            x.RuleFor(j => j.Quantity)
+                .GreaterThanOrEqualTo(0).WithMessage("A quantidade de produtos deve ser maior que 0!")
+                .NotEmpty().WithMessage(notEmpty);
+            
+            x.RuleForEach(m => m.Items).ChildRules(j =>
+            {
+                j.RuleFor(i => i.Name)
+                    .MinimumLength(3).WithMessage(MinLength("O nome do item", 3))
+                    .MaximumLength(50).WithMessage(MaxLength("O nome do item", 50))
+                    .NotEmpty().WithMessage(notEmpty);
+                
+            });
+        });
     }
+    
+    
 
 
     private string MinLength(string prop, int quantity)
