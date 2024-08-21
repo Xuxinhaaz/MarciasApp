@@ -1,0 +1,51 @@
+:host{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-image: linear-gradient(90deg, #ffff 68%,  #1D7874 68%);
+    height: 100vh;
+    width: 100vw;
+    overflow-y: hidden;
+    font-family: "Rubik", sans-serif;
+}
+#Title{
+    font-weight: 500;
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+#message{
+    font-weight: 400;
+    font-size: 25px;
+    color: #4D4D4D;
+    line-height: 2rem;
+    margin-top: 0;
+}
+.contatos-container{
+    font-weight: 400;
+    text-align: justify;
+}
+.contatos{
+    list-style: none;
+    font-size: 20;
+    margin-left: -40px;
+    line-height: 1.5rem;
+}
+.contact-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.contact{
+position: absolute;
+bottom: 12rem;
+width: 25%;
+margin-left: 8rem;
+}
+#plane{
+    position: absolute;
+    bottom: 12rem;
+    right: 5rem;
+    height: 18rem;
+    width: 18rem;
+    transform: rotate(-25deg);
+}
