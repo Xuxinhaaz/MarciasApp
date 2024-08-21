@@ -1,0 +1,20 @@
+<app-mkt-header/>
+<section class="amostracao">
+    <div class="textos">
+        <h2 class="title">Peça a melhor comida em qualquer lugar.</h2>
+        <p class="text">Descubra um universo de delícias em nosso restaurante, onde ingredientes frescos e de alta qualidade vão te conquistar do primeiro ao último prato.</p>
+        <input type="button" value="Ver Comidas" id="showFood" onclick="scroll()">
+    </div>
+    <div class="img">
+        <img src="frangofrito.png" alt="">
+            <!-- <img src="" alt="" id="arrowRight"> -->
+
+        </div>
+</section>  
+        <div id="foodWrapper">
+                <food [food]="foods[0].imgPath" [food]="foods[0].name"/>
+                <food/>
+                <food/>
+                <food/>
+
+            </div>
