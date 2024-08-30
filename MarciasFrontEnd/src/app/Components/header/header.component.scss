@@ -1,0 +1,37 @@
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 6em;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+.selected{
+}
+#Logo{
+    width: 6rem;
+    height: 4rem;
+    padding: 8px;
+    margin-left: 1.5rem;
+
+}
+.topics{
+    position: relative;
+    display: flex;
+    justify-content: space-evenly;
+    list-style: none;
+    margin-right: 1.5rem;
+    width: 30%;
+    .topicTxt{
+        margin-left: 10px;
+        font-family: "Rubik", sans-serif;
+        a{
+            text-decoration: none;
+            color: black;
+        }
+        :hover{
+            color: #4E4B4B;
+        }
+    }
+}
