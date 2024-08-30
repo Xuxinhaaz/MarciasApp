@@ -9,7 +9,7 @@ namespace MarciaApi.Domain.Repository.Orders;
 public interface IOrderRepository
 {
     Task<OrderDto> Get(Expression<Func<Order, bool>> filter);
-    Task<List<OrderDto>> Get(int pageNumber, Expression<Func<Order, bool>> filter, params Expression<Func<Order, object>>[] includes);
+    Task<List<OrderDto>> Get(int pageNumber, Expression<Func<Order, bool>>? filter, params Expression<Func<Order, object>>[] includes);
     Task<OrderDto> Generate(string id, OrdersViewModel model);
     Task Delete(Expression<Func<Order, bool>> filter);
     Task<bool> DeleteAnOrderByUserId(string id, string orderId);

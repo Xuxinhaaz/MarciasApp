@@ -1,9 +1,7 @@
 using System.Linq.Expressions;
-using System.Net;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Orders;
-using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Data;
 using MarciaApi.Presentation.DTOs.Items;
@@ -17,7 +15,7 @@ public class OrderRepository : IOrderRepository
 {
     private readonly AppDbContext _context;
     private readonly IUserRepository _userRepository;
-    private readonly IGenericRepository<Product, ProductDto> _productsGenericReporitory;
+    private readonly IGenericRepository<Product, ProductDto> _productsGenericRepository;
     private readonly IGenericRepository<Order, OrderDto> _genericRepository;
     private readonly IGenericRepository<Item, ItemDto> _genericItemRepository;
 
@@ -25,12 +23,12 @@ public class OrderRepository : IOrderRepository
         IGenericRepository<Order, OrderDto> genericRepository, 
         IUserRepository userRepository,
         AppDbContext context, 
-        IGenericRepository<Product, ProductDto> productsGenericReporitory, IGenericRepository<Item, ItemDto> genericItemRepository)
+        IGenericRepository<Product, ProductDto> productsGenericRepository, IGenericRepository<Item, ItemDto> genericItemRepository)
     {
         _genericRepository = genericRepository;
         _userRepository = userRepository;
         _context = context;
-        _productsGenericReporitory = productsGenericReporitory;
+        _productsGenericRepository = productsGenericRepository;
         _genericItemRepository = genericItemRepository;
     } 
     
@@ -44,7 +42,7 @@ public class OrderRepository : IOrderRepository
 
     public async Task<List<OrderDto>> Get(
         int pageNumber, 
-        Expression<Func<Order, bool>> filter = null, 
+        Expression<Func<Order, bool>>? filter = null, 
         params Expression<Func<Order, object>>[] includes)
     {
         var orders = await _genericRepository.Get(pageNumber, filter, includes);
@@ -115,31 +113,26 @@ public class OrderRepository : IOrderRepository
     public async Task<(double? finalPrice, List<Item>? RemovedItems, List<Product> products)> CalculatingPrice(OrdersViewModel model)
     {
         double? finalPrice = 0;
-        List<Item>? removedItems = new();
-        List<Product>? products = new();
+        List<Item> removedItems = new();
+        List<Product> products = new();
             
-        foreach (var product in model.Products)
+        foreach (var product in model.Products!)
         {
-            var productFound = await _productsGenericReporitory.Get(x => x.ProductName == product.Name);
-            
-            foreach (var productFromModel in model.Products)
-            {
-                finalPrice += productFound.TotalProductPrice * productFromModel.Quantity;
+            var productFound = await _productsGenericRepository.Get(x => x.ProductName == product.Name);
+            finalPrice += productFound.TotalProductPrice * product.Quantity;
                 
-                foreach (var item in productFromModel.Items)
+            foreach (var item in product.Items!)
+            {
+                var itemFound = await _genericItemRepository.Get(x => x.ItemName!.ToLower() == item.Name!.ToLower());
+                
+                if (item.IsRemoved)
                 {
-                    var itemFound = await _genericItemRepository.Get(x => x.ItemName == item.Name);
-                    
-                    if (item.IsRemoved)
-                    {
-                        removedItems.Add(itemFound);
-                    }
+                    removedItems.Add(itemFound);
+                }
 
-                    if (item.AddItem)
-                    {
-                        finalPrice += itemFound.ItemPrice;
-                    }
-
+                if (item.AddItem)
+                {
+                    finalPrice += itemFound.ItemPrice;
                 }
                 
             }

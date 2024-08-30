@@ -34,7 +34,7 @@ public class GenericRepository<T, T2> : IGenericRepository<T, T2> where T : clas
 
     public async Task<List<T>> Get(
         int pageNumber,
-        Expression<Func<T, bool>> filter = null, 
+        Expression<Func<T, bool>>? filter = null, 
         params Expression<Func<T, object>>[] includes)
     {
         IQueryable<T> query = _context.Set<T>();

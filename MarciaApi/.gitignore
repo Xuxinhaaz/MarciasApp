@@ -8,6 +8,7 @@
 
 MarciaBrunoRest
 
+docker-compose.yml
 
 # User-specific files
 *.rsuser
