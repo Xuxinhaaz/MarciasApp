@@ -1,5 +1,12 @@
-import { Component, Input } from '@angular/core';
-import { RecipesList } from "../../Recipes";
+import { Component, computed, Input, input } from '@angular/core';
+
+type Food = {
+  id:string;
+  name:string;
+  price:number;
+  compliment: string;
+  img: string;
+}
 
 @Component({
   selector: 'food',
@@ -9,6 +16,8 @@ import { RecipesList } from "../../Recipes";
   styleUrl: './foods.component.scss'
 })
 export class FoodsComponent {
-  @Input() food!: string;
-  selectedFood= RecipesList[0];
+  @Input ({required:true}) foodItem!: Food;
+   get imagePath(){
+    return 'foodsImg/' + this.foodItem.img;
+  }
 }

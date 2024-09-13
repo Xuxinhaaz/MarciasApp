@@ -6,8 +6,17 @@
     box-sizing: border-box;
     overflow-y: hidden;
     font-family: "Rubik", sans-serif;
-    background-image: url(../../../../../public/login.png);
-    background-size: cover;
+}
+#topHome{
+    position: absolute;
+    z-index: -1;
+    height: 100%;
+    width: 100%;
+}
+#bottomHome{
+    position:absolute;
+    bottom: 0;
+    z-index: -1;
 }
 section{
     width: 100%;

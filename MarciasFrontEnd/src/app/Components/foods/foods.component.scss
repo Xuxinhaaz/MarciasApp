@@ -17,25 +17,26 @@
 }
 #imgItem{   
     position: absolute;
+    width: 10rem;
+    height: 10rem;
     bottom: 8rem;
 }
 .junto{
-    position: relative;
+    position: absolute;
     margin-top: 4rem;
     text-align: left;
-    left: -4rem;
+    left: 2rem;
+    height: auto;
 }
 #foodName{
     font-size: 20px;
 }
 #compliment{
     font-size: 18px;
-    margin-top: 1rem;
     color: #4D4D4D;
 }
 #price{
-    left: -5.5rem;
-    position: relative;
-
+    position: absolute;
+    margin-top: 1rem;
 }
 

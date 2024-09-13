@@ -3,6 +3,7 @@ import { MktHeaderComponent } from "../../../Components/mktHeader/mkt-header/mkt
 import { FoodsComponent } from '../../../Components/foods/foods.component';
 import { ViewportScroller } from '@angular/common';
 import { RecipesList } from '../../../Recipes';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-market-home',
@@ -11,6 +12,7 @@ import { RecipesList } from '../../../Recipes';
   templateUrl: './market-home.component.html',
   styleUrl: './market-home.component.scss'
 })
+
 export class MarketHomeComponent {
   foods= RecipesList;
 }

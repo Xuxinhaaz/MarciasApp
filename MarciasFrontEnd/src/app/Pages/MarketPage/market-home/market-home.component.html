@@ -6,15 +6,19 @@
         <input type="button" value="Ver Comidas" id="showFood" onclick="scroll()">
     </div>
     <div class="img">
-        <img src="frangofrito.png" alt="">
+        <img src="/foodsImg/frangofrito.png">
             <!-- <img src="" alt="" id="arrowRight"> -->
 
         </div>
 </section>  
-        <div id="foodWrapper">
-                <food [food]="foods[0].imgPath" [food]="foods[0].name"/>
-                <food/>
-                <food/>
-                <food/>
 
-            </div>
+<section class="recipeShowcase">
+    <ul id="recipes">
+        @for(food of foods; track food.id){
+            <li id="recipe">
+                <food [foodItem]="food"/>
+            </li>
+        }
+        
+    </ul>
+</section>
