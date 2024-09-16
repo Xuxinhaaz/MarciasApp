@@ -1,30 +1,31 @@
-export const RecipesList=[
+export const RecipesList = [
     {
-        imgPath:"/foodsImg/frangofrito.png",
-        name:"Frango",
-        description:"com Batata",
-        price:21.50,
-        id: 0
+      img: "/foodsImg/frangofrito.png", // alterado de imgPath para img
+      name: "Frango",
+      compliment: "com Batata", // alterado de description para compliment
+      price: 21.50,
+      id: 0
     },
     {
-        imgPath:"/foodsImg/fitness.png",
-        name:"Marmita Fitness",
-        description:"Salada e Macarrão",
-        price:21.50,
-        id:1
+      img: "/foodsImg/fitness.png",
+      name: "Marmita Fitness",
+      compliment: "Salada e Macarrão",
+      price: 21.50,
+      id: 1
     },
     {
-        imgPath:"/foodsImg/batata.png",
-        name:"Abóbora",
-        description:"com Salada",
-        price:21.50,
-        id: 2
+      img: "/foodsImg/batata.png",
+      name: "Abóbora",
+      compliment: "com Salada",
+      price: 21.50,
+      id: 2
     },
     {
-        imgPath:"foodsImg/pizza.png",
-        name:"Pizza",
-        description:"de Calabresa",
-        price:21.50,
-        id: 3
-    },
-]
+      img: "/foodsImg/pizza.png",
+      name: "Pizza",
+      compliment: "de Calabresa",
+      price: 21.50,
+      id: 3
+    }
+  ];
+  

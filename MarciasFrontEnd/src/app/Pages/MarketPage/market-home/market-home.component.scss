@@ -63,9 +63,10 @@
     position: relative;
     margin: 0;
     padding: 0;
+
     ul{
         display: flex;
-        justify-content: space-around;
+        justify-content: space-evenly;
         padding: 0;
         list-style: none;
     }

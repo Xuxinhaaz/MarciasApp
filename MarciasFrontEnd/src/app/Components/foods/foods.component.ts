@@ -1,7 +1,7 @@
 import { Component, computed, Input, input } from '@angular/core';
 
 type Food = {
-  id:string;
+  id:number;
   name:string;
   price:number;
   compliment: string;

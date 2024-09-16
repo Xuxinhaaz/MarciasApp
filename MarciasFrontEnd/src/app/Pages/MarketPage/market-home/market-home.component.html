@@ -7,18 +7,12 @@
     </div>
     <div class="img">
         <img src="/foodsImg/frangofrito.png">
-            <!-- <img src="" alt="" id="arrowRight"> -->
-
         </div>
 </section>  
-
 <section class="recipeShowcase">
     <ul id="recipes">
-        @for(food of foods; track food.id){
-            <li id="recipe">
-                <food [foodItem]="food"/>
-            </li>
-        }
-        
+        <li *ngFor="let food of foods">
+            <food [foodItem]="food"></food>
+          </li>
     </ul>
 </section>
