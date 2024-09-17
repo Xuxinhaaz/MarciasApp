@@ -2,29 +2,24 @@ using System.Linq.Expressions;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Items;
-using MarciaApi.Infrastructure.Data;
 using MarciaApi.Presentation.DTOs.Items;
 using MarciaApi.Presentation.ViewModel.Items;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1;
 
 namespace MarciaApi.Infrastructure.Repository.Items;
 
 public class ItemsRepository : IItemsRepository
 {
-    private readonly AppDbContext _context;
     private readonly IGenericRepository<Item, ItemDto> _genericRepository;
 
-    public ItemsRepository(IGenericRepository<Item, ItemDto> genericRepository, AppDbContext context)
+    public ItemsRepository(IGenericRepository<Item, ItemDto> genericRepository)
     {
         _genericRepository = genericRepository;
-        _context = context;
     }
 
     public async Task<List<ItemDto>> Get(int pageNumber)
     {
         List<Item> items = await _genericRepository.Get(pageNumber,
-            m => m.Products
+            m => m.Products!
             );
         List<ItemDto> itemDtos = await _genericRepository.Map(items);
 
@@ -35,7 +30,7 @@ public class ItemsRepository : IItemsRepository
     {
         Item item = await _genericRepository.Get(
             m => m.ItemId == id,
-            m => m.Products);
+            m => m.Products!);
         ItemDto dto = await _genericRepository.Map(item);
         
         return dto;
@@ -56,15 +51,15 @@ public class ItemsRepository : IItemsRepository
         return newItem;
     }
 
-    public async Task<List<Item>> GetByName(List<string>? ItemsNames)
+    public async Task<List<Item>> GetByName(List<string>? itemsNames)
     {
         var foundItems = new List<Item>();
         
-        foreach (var item in ItemsNames)
+        foreach (var item in itemsNames!)
         {
             foundItems.Add(
-                await _genericRepository.Get(x => x.ItemName.ToUpper() == item.ToUpper(),
-                x => x.Products));
+                await _genericRepository.Get(x => x.ItemName != null && x.ItemName.ToUpper() == item.ToUpper(),
+                x => x.Products!));
         }
 
         return foundItems;

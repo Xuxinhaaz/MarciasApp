@@ -1,7 +1,8 @@
 using System.Linq.Expressions;
+using Amazon.S3.Model;
+using MarciaApi.Domain.Data.Cloud;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
-using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Presentation.DTOs.Products;
 using MarciaApi.Presentation.ViewModel.Products;
@@ -11,20 +12,21 @@ namespace MarciaApi.Infrastructure.Repository.Products;
 public class ProductsRepository : IProductsRepository
 {
     private readonly IGenericRepository<Product, ProductDto> _genericProductRepository;
-    private readonly IItemsRepository _itemsRepository;
+    private readonly ICloudflare _cloudflare;
 
-    public ProductsRepository(IGenericRepository<Product, ProductDto> genericProductRepository, IItemsRepository itemsRepository)
+    public ProductsRepository(
+        IGenericRepository<Product, ProductDto> genericProductRepository, ICloudflare cloudflare)
     {
         _genericProductRepository = genericProductRepository;
-        _itemsRepository = itemsRepository;
+        _cloudflare = cloudflare;
     }
 
     public async Task<List<ProductDto>> Get(int pageNumber)
     {
         List<Product> products =  await _genericProductRepository.Get(pageNumber,
-            m => m.Orders,
-            m => m.Items,
-            m => m.Sizes
+            m => m.Orders!,
+            m => m.Items!,
+            m => m.Sizes!
             );
         List<ProductDto> dtos = await _genericProductRepository.Map(products);
 
@@ -35,9 +37,9 @@ public class ProductsRepository : IProductsRepository
     { 
         Product product = await _genericProductRepository.Get(
             m => m.ProdutId == id, 
-            m => m.Items,
-            m => m.Sizes,
-            m => m.Orders);
+            m => m.Items!,
+            m => m.Sizes!,
+            m => m.Orders!);
         ProductDto dto = await _genericProductRepository.Map(product);
 
         return dto;
@@ -56,24 +58,24 @@ public class ProductsRepository : IProductsRepository
         
         foreach (var item in items)
         {
-            item.Products.Add(newProduct);
+            item.Products?.Add(newProduct);
         }
         
         var dto = await _genericProductRepository.Map(newProduct);
         
         await _genericProductRepository.Add(newProduct);
         await _genericProductRepository.SaveAll();
-        
+
+        await _cloudflare.AddFile(model.ProductPhoto!);
+
         return dto;
     }
 
-    
-
-    public async Task<List<Product>> GetByName(List<string>? ProductsNames)
+    public async Task<List<Product>> GetByName(List<string>? productsNames)
     {
         List<Product> products = new();
 
-        foreach (var name in ProductsNames)
+        foreach (var name in productsNames!)
         {
             products.Add(await _genericProductRepository.Get(x => x.ProductName == name));
         }

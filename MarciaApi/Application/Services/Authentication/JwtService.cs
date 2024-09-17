@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using MarciaApi.Domain.Models;
-using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MarciaApi.Application.Services.Authentication;
@@ -33,7 +32,7 @@ public class JwtService : IJwtService
 
         var claimsIndetity = new ClaimsIdentity(claims);
 
-        var experies = DateTime.UtcNow.AddDays(2);
+        var experies = DateTime.UtcNow.AddDays(30);
 
         var tokenDescriptor = new SecurityTokenDescriptor()
         {

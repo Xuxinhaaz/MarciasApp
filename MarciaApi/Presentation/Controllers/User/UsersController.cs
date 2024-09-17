@@ -1,6 +1,5 @@
 using FluentValidation;
-using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorization;
+using MarciaApi.Infrastructure.Services.Auth.Authentication;
 using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.User;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +11,9 @@ namespace MarciaApi.Presentation.Controllers.User;
 public class UsersController : ControllerBase
 {
     private readonly IValidator<UserViewModel> _usersViewModelValidator;
-    private readonly Infrastructure.Services.Authentication.IAuthenticationService _authenticationService;
-    public UsersController(IValidator<UserViewModel> usersViewModelValidator, 
-        MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService authenticationService
-        )
+    private readonly IAuthenticationService _authenticationService;
+    public UsersController(
+        IValidator<UserViewModel> usersViewModelValidator, IAuthenticationService authenticationService)
     {
         _usersViewModelValidator = usersViewModelValidator;
         _authenticationService = authenticationService;

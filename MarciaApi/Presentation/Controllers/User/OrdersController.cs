@@ -4,13 +4,13 @@ using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorization;
+using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
 using MarciaApi.Presentation.DTOs.Items;
 using MarciaApi.Presentation.ViewModel.Orders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace MarciaApi.Presentation.Controllers;
+namespace MarciaApi.Presentation.Controllers.User;
 
 [ApiController]
 public class OrdersController
@@ -54,15 +54,15 @@ public class OrdersController
 
         return new OkObjectResult(new
         {
-            Orders = await _orderRepository.Get(pageNumber, x => x.UsersId == id, x => x.Products)
+            Orders = await _orderRepository.Get(pageNumber, x => x.UsersId == id, x => x.Products!)
         });
     }
     
     [HttpGet("/Orders")]
-    public async Task<IActionResult> GetOrders([FromHeader] string Authorization, 
+    public async Task<IActionResult> GetOrders([FromHeader] string authorization, 
         [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -81,11 +81,11 @@ public class OrdersController
     }
 
     [HttpPost("/Orders/{id}")]
-    public async Task<IActionResult> PostAnOrder([FromHeader] string Authorization, 
+    public async Task<IActionResult> PostAnOrder([FromHeader] string authorization, 
         [FromRoute] string id,
         [FromBody] OrdersViewModel viewModel)
     {
-        var auth = await _authorizationService.Authorize(Authorization);
+        var auth = await _authorizationService.Authorize(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -125,7 +125,7 @@ public class OrdersController
             });
         }
 
-        foreach (var product in viewModel.Products)
+        foreach (var product in viewModel.Products!)
         {
             if (!await _productsRepository.Any(x => x.ProductName == product.Name))
             {
@@ -138,7 +138,7 @@ public class OrdersController
                 });
             }
 
-            foreach (var item in product.Items)
+            foreach (var item in product.Items!)
             {
                 if (!await _genericItemRepository.Any(x => x.ItemName == item.Name))
                 {
@@ -154,17 +154,7 @@ public class OrdersController
         }
         
         var newOrder = await _orderRepository.Generate(id, viewModel);
-        if (newOrder is null)
-        {
-            return new BadRequestObjectResult(new
-            {
-                errors = new
-                {
-                    message = "Um erro desconhecido aconteceu!"
-                }
-            });
-        }
-
+        
         return new OkObjectResult(new
         {
             order = newOrder
@@ -172,9 +162,9 @@ public class OrdersController
     }
 
     [HttpDelete("/Orders/{id}")]
-    public async Task<IActionResult> DeleteAnOrder([FromHeader] string Authorization, [FromRoute] string id, [FromQuery] string orderId)
+    public async Task<IActionResult> DeleteAnOrder([FromHeader] string authorization, [FromRoute] string id, [FromQuery] string orderId)
     {
-        var auth = await _authorizationService.Authorize(Authorization);
+        var auth = await _authorizationService.Authorize(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new

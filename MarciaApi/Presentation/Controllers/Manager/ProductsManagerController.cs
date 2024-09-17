@@ -1,6 +1,6 @@
 using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Domain.Repository.Products;
-using MarciaApi.Infrastructure.Services.Auth.Authorization;
+using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
 using MarciaApi.Presentation.ViewModel.Products;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,10 +22,10 @@ public class ProductsManagerController
 
     [HttpGet("/Manager/Products")]
     public async Task<IActionResult> Get(
-        [FromHeader] string Authorization, 
+        [FromHeader] string authorization, 
         [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -58,10 +58,10 @@ public class ProductsManagerController
     [HttpGet("/Manager/Products/{id}")]
 
     public async Task<IActionResult> GetById(
-        [FromHeader] string Authorization, 
+        [FromHeader] string authorization, 
         [FromRoute] string id)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)  
         {
             return new UnauthorizedObjectResult(new
@@ -80,7 +80,7 @@ public class ProductsManagerController
             {
                 errors = new
                 {
-                    message = "Não há produtos registrados."
+                    message = "Não há um produto com este nome registrado no sistema!"
                 }
             });
         }
@@ -93,10 +93,10 @@ public class ProductsManagerController
 
     [HttpPost("/Manager/Products")]
     public async Task<IActionResult> Post(
-        [FromHeader] string Authorization, 
-        [FromBody] ProductsViewModel viewModel)
+        [FromHeader] string authorization, 
+        [FromForm] ProductsViewModel viewModel)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -108,7 +108,7 @@ public class ProductsManagerController
             });
         }
 
-        var anyProducts = await _productsRepository.Any(x => x.ProductName.ToLower() == viewModel.Name.ToLower()); 
+        var anyProducts = await _productsRepository.Any(x => x.ProductName!.ToLower() == viewModel.Name!.ToLower()); 
         if (anyProducts)
         {
             return new BadRequestObjectResult(new
@@ -120,9 +120,9 @@ public class ProductsManagerController
             });
         }
 
-        foreach (var itemsName in viewModel.ItemsNames)
+        foreach (var itemsName in viewModel.ItemsNames!)
         {
-            var anyItem = await _itemsRepository.Any(x => x.ItemName.ToLower() == itemsName.ToLower());
+            var anyItem = await _itemsRepository.Any(x => x.ItemName!.ToLower() == itemsName.ToLower());
             if (!anyItem)
             {
                 return new BadRequestObjectResult(new

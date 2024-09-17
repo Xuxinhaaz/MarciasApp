@@ -1,5 +1,3 @@
-using MarciaApi.Domain.Models;
-
 namespace MarciaApi.Presentation.ViewModel.Products;
 
 public class ProductsViewModel
@@ -8,4 +6,5 @@ public class ProductsViewModel
     public string? Description { get; set; }
     public List<string>? ItemsNames { get; set; }
     public double? Price { get; set; }
+    public IFormFile? ProductPhoto { get; set; }
 }

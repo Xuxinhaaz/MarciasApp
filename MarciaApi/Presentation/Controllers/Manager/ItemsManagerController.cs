@@ -1,5 +1,5 @@
 using MarciaApi.Domain.Repository.Items;
-using MarciaApi.Infrastructure.Services.Auth.Authorization;
+using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
 using MarciaApi.Presentation.ViewModel.Items;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +18,9 @@ public class ItemsManagerController
     }
 
     [HttpGet("/Manager/Items")]
-    public async Task<IActionResult> Get([FromHeader] string Authorization, [FromQuery] int pageNumber)
+    public async Task<IActionResult> Get([FromHeader] string authorization, [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -39,9 +39,9 @@ public class ItemsManagerController
     }
     
     [HttpGet("/Manager/Items/{id}")]
-    public async Task<IActionResult> GetById([FromHeader] string Authorization, [FromRoute] string id)
+    public async Task<IActionResult> GetById([FromHeader] string authorization, [FromRoute] string id)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -71,9 +71,9 @@ public class ItemsManagerController
     }
 
     [HttpPost("/Manager/Items")]
-    public async Task<IActionResult> Post([FromHeader] string Authorization, [FromBody] ItemsViewModel viewModel)
+    public async Task<IActionResult> Post([FromHeader] string authorization, [FromBody] ItemsViewModel viewModel)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new

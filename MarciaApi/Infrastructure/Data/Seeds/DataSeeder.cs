@@ -1,5 +1,4 @@
 using MarciaApi.Domain.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace MarciaApi.Infrastructure.Data.Seeds;
 
@@ -13,7 +12,7 @@ public class DataSeeder
 
     public void Seed()
     {
-        if (!_context.Roles.Any())
+        if (!_context.Roles!.Any())
         {
             var roles = new List<Roles>()
             {

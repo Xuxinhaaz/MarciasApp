@@ -1,8 +1,7 @@
-using MarciaApi.Domain.Models;
 using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.User;
 
-namespace MarciaApi.Infrastructure.Services.Authentication;
+namespace MarciaApi.Infrastructure.Services.Auth.Authentication;
 
 public interface IAuthenticationService
 {

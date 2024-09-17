@@ -1,7 +1,9 @@
 using System.Text;
 using MarciaApi.Application;
+using MarciaApi.Domain.Data.Cloud;
 using MarciaApi.Infrastructure;
 using MarciaApi.Infrastructure.Data;
+using MarciaApi.Infrastructure.Data.Cloud;
 using MarciaApi.Infrastructure.Data.Seeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(x =>
     x.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
 
 builder.Services.AddTransient<DataSeeder>();
-
+builder.Services.AddScoped<ICloudflare, Cloudflare>(x => new Cloudflare(builder.Configuration));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

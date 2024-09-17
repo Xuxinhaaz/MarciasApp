@@ -1,7 +1,5 @@
-using FluentValidation;
 using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Services.Auth.Authorization;
-using MarciaApi.Presentation.ViewModel.User;
+using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarciaApi.Presentation.Controllers.Manager;
@@ -9,23 +7,20 @@ namespace MarciaApi.Presentation.Controllers.Manager;
 [ApiController]
 public class UsersManagerController
 {
-    private readonly MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService _authenticationService;
     private readonly IAuthorizationService _authorizationService;
     private readonly IUserRepository _userRepository;
     public UsersManagerController(
-        MarciaApi.Infrastructure.Services.Authentication.IAuthenticationService authenticationService, 
         IAuthorizationService authorizationService, 
         IUserRepository userRepository)
     {
-        _authenticationService = authenticationService;
         _authorizationService = authorizationService;
         _userRepository = userRepository;
     }
     
     [HttpGet("/Manager/Users")] 
-    public async Task<IActionResult> GetUsers([FromHeader] string Authorization, [FromQuery] int pageNumber)
+    public async Task<IActionResult> GetUsers([FromHeader] string authorization, [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new
@@ -44,9 +39,9 @@ public class UsersManagerController
     }
     
     [HttpDelete("/Manager/Users/{id}")]
-    public async Task<IActionResult> DeleteAnUser([FromHeader] string Authorization, [FromRoute] string id)
+    public async Task<IActionResult> DeleteAnUser([FromHeader] string authorization, [FromRoute] string id)
     {
-        var auth = await _authorizationService.AuthorizeManager(Authorization);
+        var auth = await _authorizationService.AuthorizeManager(authorization);
         if (!auth)
         {
             return new UnauthorizedObjectResult(new

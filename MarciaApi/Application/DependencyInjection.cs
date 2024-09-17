@@ -26,7 +26,6 @@ using MarciaApi.Presentation.DTOs.Roles;
 using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.Orders;
 using MarciaApi.Presentation.ViewModel.User;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace MarciaApi.Application;
 

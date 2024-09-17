@@ -4,9 +4,8 @@ using MarciaApi.Application.Services.Email;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.User;
-using Microsoft.AspNetCore.Identity;
 
-namespace MarciaApi.Infrastructure.Services.Authentication;
+namespace MarciaApi.Infrastructure.Services.Auth.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
@@ -35,7 +34,7 @@ public class AuthenticationService : IAuthenticationService
             {
                 Console.WriteLine("Passei aqui");
                 
-                await _emailSender.SendEmailAsync(model.Email, 
+                await _emailSender.SendEmailAsync(model.Email!, 
                     "Marmitaria da Marcia",
                     "caio's Dick is the smallest i've ever seen!!!!!");
 

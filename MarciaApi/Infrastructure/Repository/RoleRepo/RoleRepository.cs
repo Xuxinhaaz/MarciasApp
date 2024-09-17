@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.RoleRepo;
-using MarciaApi.Infrastructure.Data;
 using MarciaApi.Presentation.DTOs.Roles;
 
 namespace MarciaApi.Infrastructure.Repository.RoleRepo;
