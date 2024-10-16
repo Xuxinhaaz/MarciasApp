@@ -1,0 +1,43 @@
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 6em;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+.selected{
+}
+#Logo{
+    width: 6rem;
+    height: 4rem;
+    padding: 8px;
+    margin-left: 1.5rem;
+
+}
+#cesta{
+    position: relative  ;
+    height: 30px;
+    width: 30px;
+    margin-right: 3rem;
+}
+.topics{
+    position: relative;
+    display: flex;
+    justify-content: space-evenly;
+    list-style: none;
+    width: 30%;
+    .topicTxt{
+        margin-left: 10px;
+        font-family: "Rubik", sans-serif;
+        a{
+            text-decoration: none;
+            color: black;
+        }
+        :hover{
+            color: #4E4B4B;
+            text-decoration: underline 3px solid #1D7874;
+        }
+    }
+}
