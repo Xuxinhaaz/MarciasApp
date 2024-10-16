@@ -1,3 +1,4 @@
+
 import { Food } from './Components/model/Foods';
 
 export const RecipesList:Food[] = [
@@ -30,4 +31,3 @@ export const RecipesList:Food[] = [
       id: 3
     }
   ];
-  

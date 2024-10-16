@@ -1,3 +1,4 @@
+
 import { Routes, ExtraOptions } from '@angular/router';
 import { HomeComponent } from './Pages/StartingPage/home/home.component';
 import { LoginComponent } from './Pages/StartingPage/login/login.component';
