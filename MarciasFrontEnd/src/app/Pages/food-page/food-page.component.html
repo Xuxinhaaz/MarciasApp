@@ -1,32 +1,32 @@
+<app-mkt-header/>
 <main>
-    <section>
+    <section class="cima">
         <aside class="foodImg">
-            <!-- <img [src]="food.img" [alt]="food.name"> -->
+            <img [src]="food.img" [alt]="food.name">
         </aside>
         <aside class="foodInfo">
-            <h2 id="name"></h2>
-            <p id="price"></p>
+            <div class="togheter">
+                <p id="name">{{food.name}}</p>
+                <p id="compliment">{{food.compliment}}</p>
+                <p id="price">R$:{{food.price}}</p>   
+            </div>
             <p id="detail">Frete Gratis</p>
-            <select name="select">
-                <option value="valor1">Valor 1</option>
+            <select id="foodOptions" name="select">
+                <option value="valor1">Salada</option>
                 <option value="valor2" selected>Valor 2</option>
                 <option value="valor3">Valor 3</option>
             </select>
             <div class="container">
-                <p>Quantidade</p>
-                <select></select>
+                <p>Quantidade:</p>
+                <select id="quantity"></select>
                 <input type="button" value="Adicionar">
             </div>
         </aside>
     </section>
     <section class="moreinfo">
-        <p>Esse prato serve stringinterpolation e contem</p>
+        <p>Esse prato serve {{food.portion}} pessoa(as) e contem</p>
         <ul>
-            <li>sla</li>
-            <li>sla</li>
-            <li>sla</li>
-            <li>sla</li>
-            <li>sla</li>
+            <li *ngFor="let ingredient of food.ingredients">{{ingredient}}</li>
         </ul>
     </section>
 </main>

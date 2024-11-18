@@ -7,13 +7,13 @@
         <input type="button" value="Ver Comidas" id="showFood" onclick="scroll()">
     </div>
     <div class="img">
-        <img src="/foodsImg/frangofrito.png">
+        <img src="/foodsImg/frangofrito2.png">
         </div>
 </section>  
 <section class="recipeShowcase">
     <ul id="recipes">
         <li *ngFor="let food of foods">
-            <a  routerLink="food/{{food.id}}">
+            <a  routerLink="/food/{{food.id}}">
             <section class="containerFood">
                 <img [src]="food.img" alt="" id="imgItem">
                 <div class="junto">

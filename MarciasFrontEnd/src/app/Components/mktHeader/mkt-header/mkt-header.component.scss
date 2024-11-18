@@ -1,11 +1,14 @@
+
 header{
     display: flex;
+    position: absolute;
     justify-content: space-between;
     align-items: center;
     height: 6em;
     width: 100vw;
     margin: 0;
     padding: 0;
+    background-color: whitesmoke;
 }
 .selected{
 }
@@ -21,6 +24,7 @@ header{
     height: 30px;
     width: 30px;
     margin-right: 3rem;
+    color: #075985;
 }
 .topics{
     position: relative;
@@ -34,10 +38,13 @@ header{
         a{
             text-decoration: none;
             color: black;
+            
         }
         :hover{
             color: #4E4B4B;
-            text-decoration: underline 3px solid #1D7874;
+            text-decoration: underline 3px solid #075985 ;
+            transition: 0.3s all ease;
+
         }
     }
 }

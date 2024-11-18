@@ -1,6 +1,5 @@
-:host{
+:host {
     margin: 0;
-    padding: 0;
     height: auto;
     width: auto;
     display: flex;
@@ -10,25 +9,30 @@
     font-family: "Rubik", sans-serif;
     overflow-y: hidden;
 }
-.amostracao{
+
+.amostracao {
     display: flex;
     width: 100%;
     height: 40%;
     align-items: center;
+    margin-top: 6rem;
 }
-.textos{
+
+.textos {
     width: 50%;
     height: 100%;
     position: relativo;
     margin-left: 3rem;
-    .title{
+
+    .title {
         font-weight: 500;
         font-size: 40px;
         margin-bottom: 20px;
         line-height: 3rem;
         width: 80%;
     }
-    .text{
+
+    .text {
         font-weight: 400;
         font-size: 18px;
         width: 80%;
@@ -37,9 +41,10 @@
         margin-top: 0;
     }
 }
-#showFood{
-    background-color: #1D7874;
-    border: 2px solid #1D7874;
+
+#showFood {
+    background-color: #075985;
+    border: 2px solid #075985;
     border-radius: 5px;
     border-style: none;
     height: 2rem;
@@ -47,16 +52,20 @@
     color: white;
     cursor: pointer;
 }
-.img{
-    width: 50%;position: relative;
+
+.img {
+    width: 50%;
+    position: relative;
     height: 50%;
     padding-left: 6rem;
-    img{
+
+    img {
         width: 32rem;
         height: 22rem;
     }
 }
-.recipeShowcase{
+
+.recipeShowcase {
     height: 100vh;
     width: 100vw;
     top: 8rem;
@@ -64,14 +73,20 @@
     margin: 0;
     padding: 0;
 
-    ul{
+    ul {
         display: flex;
         justify-content: space-evenly;
         padding: 0;
         list-style: none;
     }
+
+    a {
+        text-decoration: none;
+        color: black;
+    }
 }
-.containerFood{
+
+.containerFood {
     display: flex;
     background-color: white;
     flex-direction: column;
@@ -83,31 +98,38 @@
     position: relative;
     border-radius: 20px;
     text-align: left;
-    box-shadow: #4D4D4D 0.5px 1.5px 1px ;
+    -webkit-box-shadow: 0px 0px 10px 0px rgba(115, 115, 115, 1);
+    -moz-box-shadow: 0px 0px 10px 0px rgba(115, 115, 115, 1);
+    box-shadow: 0px 0px 10px 0px rgba(115, 115, 115, 1);
     background-size: contain;
 }
-#imgItem{   
+
+#imgItem {
     position: absolute;
-    width: 12rem;
-    height: 12rem;
-    object-fit:fill;
+    width: 10rem;
+    height: 10rem;
+    object-fit: fill;
     bottom: 8rem;
 }
-.junto{
+
+.junto {
     position: absolute;
     margin-top: 4rem;
     text-align: left;
     left: 2rem;
     height: auto;
 }
-#foodName{
+
+#foodName {
     font-size: 20px;
 }
-#compliment{
+
+#compliment {
     font-size: 18px;
     color: #4D4D4D;
 }
-#price{
+
+#price {
     position: absolute;
     margin-top: 1rem;
 }
