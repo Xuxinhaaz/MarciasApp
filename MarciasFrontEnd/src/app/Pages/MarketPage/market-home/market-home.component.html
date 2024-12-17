@@ -1,0 +1,28 @@
+
+<app-mkt-header/>
+<section class="amostracao">
+    <div class="textos">
+        <h2 class="title">Peça a melhor comida em qualquer lugar.</h2>
+        <p class="text">Descubra um universo de delícias em nosso restaurante, onde ingredientes frescos e de alta qualidade vão te conquistar do primeiro ao último prato.</p>
+        <input type="button" value="Ver Comidas" id="showFood" onclick="scroll()">
+    </div>
+    <div class="img">
+        <img src="/foodsImg/frangofrito2.png">
+        </div>
+</section>  
+<section class="recipeShowcase">
+    <ul id="recipes">
+        <li *ngFor="let food of foods">
+            <a  routerLink="/food/{{food.id}}">
+            <section class="containerFood">
+                <img [src]="food.img" alt="" id="imgItem">
+                <div class="junto">
+                    <span id="foodName"> {{food.name}}</span> <br>
+                    <span id="compliment">{{food.compliment}}</span> <br>
+                    <span id="price">R$:{{food.price}}</span>
+                </div>
+            </section>
+        </a>
+        </li>
+    </ul>
+</section>

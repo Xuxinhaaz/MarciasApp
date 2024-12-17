@@ -1,0 +1,26 @@
+<app-mkt-header/>
+<main>
+    <section class="cima">
+        <aside class="foodImg">
+            <img [src]="food.img" [alt]="food.name">
+        </aside>
+        <aside class="foodInfo">
+            <div class="togheter">
+                <p id="name">{{food.name}}</p>
+                <p id="compliment">{{food.compliment}}</p>
+                <p id="price">R$:{{food.price}}</p>   
+            </div>
+            <p id="detail">Frete Gratis</p>
+
+            <div class="container">
+                <input type="button" value="Adicionar" (click)="addToCart()">
+            </div>
+        </aside>
+    </section>
+    <section class="moreinfo">
+        <p>Esse prato serve {{food.portion}} pessoa(as) e contem</p>
+        <ul>
+            <li *ngFor="let ingredient of food.ingredients">{{ingredient}}</li>
+        </ul>
+    </section>
+</main>
