@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ErrorOr;
 using MarciaApi.Domain.Models;
+using MarciaApi.Presentation.Errors.AuthErrors;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MarciaApi.Application.Services.Authentication;
@@ -17,7 +19,7 @@ public class JwtService : IJwtService
         _logger = logger;
     }
 
-    public async Task<string> Generate(UserModel model)
+    public async Task<ErrorOr<string>> Generate(UserModel model)
     {
         var hanlder = new JwtSecurityTokenHandler();
 
@@ -49,15 +51,18 @@ public class JwtService : IJwtService
 
         var token = hanlder.WriteToken(createdToken);
 
+        if (token is null)
+            return JwtErrors.TokenIsNull;
+
         return token;
     }
 
-    public async Task<bool> Validate(string token)
+    public async Task<ErrorOr<string>> Validate(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!)),
             ValidateIssuer = true,
             ValidIssuer = _configuration["Jwt:Issuer"],
             ValidateAudience = true,
@@ -66,20 +71,15 @@ public class JwtService : IJwtService
         };
 
         var handler = new JwtSecurityTokenHandler();
-
-        try
-        {
-            var validationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
-            return validationResult.IsValid;
-        }
-        catch (SecurityTokenException ex)
-        {
-            _logger.LogError(ex.ToString());
-            return false;
-        }
+        
+        var validationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
+        if (!validationResult.IsValid)
+            return JwtErrors.NotSignedUp;
+        
+        return token;
     }
 
-    public async Task<bool> ValidateMangager(string token)
+    public async Task<ErrorOr<string>> ValidateMangager(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -94,24 +94,15 @@ public class JwtService : IJwtService
 
         var handler = new JwtSecurityTokenHandler();
 
-        try
-        {
+        
             var validationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
 
-            if (validationResult.IsValid)
-            {
-                var claimsIdentity = validationResult.ClaimsIdentity;
-                if (claimsIdentity.HasClaim(ClaimTypes.Role, "Manager")) return true;
-            }
+            if (!validationResult.IsValid)
+                return JwtErrors.NotSignedUp;
             
-            _logger.LogError("User tried to access protected endpoint!");
-            return false;
+            var claimsIdentity = validationResult.ClaimsIdentity;
+            if (claimsIdentity.HasClaim(ClaimTypes.Role, "Manager")) return token;
 
-        }
-        catch (SecurityTokenException ex)
-        {
-            _logger.LogError(ex.ToString());
-            return false;
-        }
+            return JwtErrors.UserIsNotAllowed;
     }
 }

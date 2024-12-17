@@ -1,14 +1,16 @@
+using ErrorOr;
 using FluentValidation;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
+using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
 using MarciaApi.Presentation.DTOs.Items;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using MarciaApi.Presentation.ViewModel.Orders;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MarciaApi.Presentation.Controllers.User;
 
@@ -20,19 +22,18 @@ public class OrdersController
     private readonly IValidator<OrdersViewModel> _validator;
     private readonly IUserRepository _userRepository;
     private readonly IProductsRepository _productsRepository;
-    private readonly IGenericRepository<Item, ItemDto> _genericItemRepository;
-
+    private readonly IItemsRepository _itemsRepository;
     public OrdersController(IOrderRepository orderRepository, 
     IAuthorizationService authorizationService, 
     IValidator<OrdersViewModel> validator,  
-    IUserRepository userRepository, IProductsRepository productsRepository, IGenericRepository<Item, ItemDto> genericItemRepository)
+    IUserRepository userRepository, IProductsRepository productsRepository, IItemsRepository itemsRepository)
     {
         _orderRepository = orderRepository;
         _authorizationService = authorizationService;
         _validator = validator;
         _userRepository = userRepository;
         _productsRepository = productsRepository;
-        _genericItemRepository = genericItemRepository;
+        _itemsRepository = itemsRepository;
     }
 
     [HttpGet("/Orders/{id}")]
@@ -40,15 +41,12 @@ public class OrdersController
         [FromRoute] string id,
         [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.Authorize(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
 
@@ -62,15 +60,12 @@ public class OrdersController
     public async Task<IActionResult> GetOrders([FromHeader] string authorization, 
         [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.Authorize(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
 
@@ -85,27 +80,22 @@ public class OrdersController
         [FromRoute] string id,
         [FromBody] OrdersViewModel viewModel)
     {
-        var auth = await _authorizationService.Authorize(authorization);
-        if (!auth)
+        var auth = _authorizationService.Authorize(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
+
         
         var validationResponse = _validator.Validate(viewModel);
         if (!validationResponse.IsValid)
         {
-            var errors = new ModelStateDictionary();
-
-            foreach (var error in validationResponse.Errors)
-            {
-                errors.AddModelError(error.PropertyName, error.ErrorMessage);
-            }
+            var errors = validationResponse.Errors
+                .Select(x => Error.Validation(x.PropertyName, x.ErrorMessage))
+                .ToList();
 
             return new BadRequestObjectResult(new
             {
@@ -127,33 +117,36 @@ public class OrdersController
 
         foreach (var product in viewModel.Products!)
         {
-            if (!await _productsRepository.Any(x => x.ProductName == product.Name))
+            var productWithSameName = await _productsRepository.Any(x => x.ProductName!.ToLower() == product.Name!.ToLower());
+            
+            if (!productWithSameName)
             {
                 return new BadRequestObjectResult(new
                 {
-                    errors = new
-                    {
-                        message = $"Não há produtos com nome: {product.Name} cadastrado no sistema"
-                    }
+                    Errors = ProductRepositoryErrors.ThereIsntAnExistingProductWithSameName
                 });
             }
 
             foreach (var item in product.Items!)
             {
-                if (!await _genericItemRepository.Any(x => x.ItemName == item.Name))
+                if (!await _itemsRepository.Any(x => x.ItemName == item.Name))
                 {
                     return new BadRequestObjectResult(new
                     {
-                        errors = new
-                        {
-                            message = $"Não há nenhum item com nome: {item.Name} cadastrado no sistema"
-                        }
+                        Errors = ItemsRepositoryErrors.AlreadyExistsItemWithProvidedName
                     });
                 }
             }
         }
         
         var newOrder = await _orderRepository.Generate(id, viewModel);
+        if (newOrder.IsError)
+        {
+            return new BadRequestObjectResult(new
+            {
+                newOrder.Errors
+            });
+        }
         
         return new OkObjectResult(new
         {
@@ -164,46 +157,35 @@ public class OrdersController
     [HttpDelete("/Orders/{id}")]
     public async Task<IActionResult> DeleteAnOrder([FromHeader] string authorization, [FromRoute] string id, [FromQuery] string orderId)
     {
-        var auth = await _authorizationService.Authorize(authorization);
-        if (!auth)
+        var auth = _authorizationService.Authorize(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "voce não esta autenticado"
-                }
+                auth.Errors
             });
         }
 
         var anyUserWithProvidedId = await _orderRepository.Any(x => x.UsersId == id);
         if (!anyUserWithProvidedId)
         {
-            return new BadRequestObjectResult(new
+            return new NotFoundObjectResult(new
             {
-                errors = new
-                {
-                    message = "Voce não tem nenhum pedido"
-                }
+                UserRepositoryErrors.HaventFoundAnyUserWithProvidedId
             });
         }
 
         var doesOrderExists = await _orderRepository.Any(x => x.OrderId == orderId);
-        if(!doesOrderExists) return new BadRequestObjectResult(new
+        if(!doesOrderExists) return new NotFoundObjectResult(new
         {
-            errors = new
-            {
-                message = "Este pedido não existe!"
-            }
+            Errros = OrderRepositoryErrors.HaventFoundAnyOrderWithProvidedId
         });
 
-        if(!await _orderRepository.DeleteAnOrderByUserId(id, orderId)) 
+        var deleteAnOrderByUserId = await _orderRepository.DeleteAnOrderByUserId(id, orderId);
+        if(deleteAnOrderByUserId.IsError) 
         {
             return new BadRequestObjectResult(new {
-                errors = new 
-                {
-                    message = "Não foi possível deletar o pedido"
-                }
+                deleteAnOrderByUserId.Errors
             });
         }
 
@@ -212,4 +194,6 @@ public class OrdersController
             message = "pedido deletado!"
         });
     }
+
+    
 }

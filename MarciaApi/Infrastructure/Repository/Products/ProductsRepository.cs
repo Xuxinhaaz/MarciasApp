@@ -1,10 +1,11 @@
 using System.Linq.Expressions;
-using Amazon.S3.Model;
+using ErrorOr;
 using MarciaApi.Domain.Data.Cloud;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Products;
 using MarciaApi.Presentation.DTOs.Products;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using MarciaApi.Presentation.ViewModel.Products;
 
 namespace MarciaApi.Infrastructure.Repository.Products;
@@ -33,19 +34,22 @@ public class ProductsRepository : IProductsRepository
         return dtos;
     }
 
-    public async Task<ProductDto> Get(string id)
+    public async Task<ErrorOr<ProductDto>> Get(string id)
     { 
         Product product = await _genericProductRepository.Get(
             m => m.ProdutId == id, 
             m => m.Items!,
             m => m.Sizes!,
             m => m.Orders!);
+        if (product == null)
+            return ProductRepositoryErrors.HaventFoundProductWithProvidedId;
+        
         ProductDto dto = await _genericProductRepository.Map(product);
 
         return dto;
     }
 
-    public async Task<ProductDto> Generate(ProductsViewModel model, List<Item> items)
+    public async Task<ErrorOr<ProductDto>> Generate(ProductsViewModel model, List<Item> items)
     {
         Product newProduct = new()
         {

@@ -1,17 +1,14 @@
 using System.Linq.Expressions;
 using AutoMapper;
+using ErrorOr;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
-using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Domain.Repository.RoleRepo;
 using MarciaApi.Domain.Repository.User;
-using MarciaApi.Infrastructure.Data;
-using MarciaApi.Presentation.Controllers.Manager;
-using MarciaApi.Presentation.DTOs.Orders;
 using MarciaApi.Presentation.DTOs.Roles;
 using MarciaApi.Presentation.DTOs.User;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using MarciaApi.Presentation.ViewModel.User;
-using Microsoft.EntityFrameworkCore;
 
 namespace MarciaApi.Infrastructure.Repository.User;
 
@@ -36,10 +33,9 @@ public class UserRepository : IUserRepository
         _roleRepository = roleRepository;
     }
 
-    public async Task<UserModel> Generate(UserViewModel model)
+    public async Task<ErrorOr<UserModel>> Generate(UserViewModel model)
     {
-        var ClientRole = await _genericRoleRepository.Get(x => x.Role == "Client");
-        Console.WriteLine(ClientRole);
+        var clientRole = await _genericRoleRepository.Get(x => x.Role == "Client");
         
         var newUser =  new UserModel()
         {
@@ -47,7 +43,7 @@ public class UserRepository : IUserRepository
             Email = model.Email,
         };
 
-        newUser.Roles.Add(ClientRole);
+        newUser.Roles.Add(clientRole);
 
         if (model.Email == _configuration["ManagerEmail"])
         {
@@ -71,9 +67,12 @@ public class UserRepository : IUserRepository
         return dtos;
     }
 
-    public async Task<UserModelDto> Get(string? id)
+    public async Task<ErrorOr<UserModelDto>> Get(string? id)
     {   
         UserModel userModel = await _genericRepository.Get(m => m.Id == id);
+        if (userModel == null)
+            return UserRepositoryErrors.HaventFoundAnyUserWithProvidedId;
+        
         UserModelDto dto = await _genericRepository.Map(userModel);
 
         return dto;

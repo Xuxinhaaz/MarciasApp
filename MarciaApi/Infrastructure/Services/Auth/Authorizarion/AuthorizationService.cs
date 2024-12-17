@@ -1,3 +1,4 @@
+using ErrorOr;
 using MarciaApi.Application.Services.Authentication;
 
 namespace MarciaApi.Infrastructure.Services.Auth.Authorizarion;
@@ -11,13 +12,13 @@ public class AuthorizationService : IAuthorizationService
         _jwtService = jwtService;
     }
 
-    public async Task<bool> Authorize(string token)
+    public ErrorOr<string> Authorize(string token)
     {
-        return await _jwtService.Validate(token);
+        return _jwtService.Validate(token).Result;
     }
 
-    public async Task<bool> AuthorizeManager(string token)
+    public ErrorOr<string> AuthorizeManager(string token)
     {
-        return await _jwtService.ValidateMangager(token);
+        return _jwtService.ValidateMangager(token).Result;
     }
 }

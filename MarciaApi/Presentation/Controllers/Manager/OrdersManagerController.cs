@@ -1,5 +1,6 @@
 using MarciaApi.Domain.Repository.Orders;
 using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarciaApi.Presentation.Controllers.Manager;
@@ -19,15 +20,12 @@ public class OrdersManagerController
     [HttpGet("/Manager/Orders")]
     public async Task<IActionResult> GetOrders([FromHeader] string authorization, [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
 
@@ -40,27 +38,21 @@ public class OrdersManagerController
     [HttpDelete("/Manager/Orders/{id}")]
     public async Task<IActionResult> DeleteAnOrder([FromHeader] string authorization, [FromRoute] string id)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
 
         var anyOrderWithProvidedId = await _orderRepository.Any(x => x.OrderId == id);
         if (!anyOrderWithProvidedId)
         {
-            return new BadRequestObjectResult(new
+            return new NotFoundObjectResult(new
             {
-                errors = new
-                {
-                    message = "Não há este pedido registrado no sistema!"
-                }
+                Errors = OrderRepositoryErrors.HaventFoundAnyOrderWithProvidedId
             });
         }
 
@@ -68,7 +60,7 @@ public class OrdersManagerController
 
         return new OkObjectResult(new
         {
-            message = "pedido deletado!"
+            description = "pedido deletado!"
         });
     }
 }

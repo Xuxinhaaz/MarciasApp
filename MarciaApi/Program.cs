@@ -20,6 +20,17 @@ builder.Services.AddDbContext<AppDbContext>(x =>
 builder.Services.AddTransient<DataSeeder>();
 builder.Services.AddScoped<ICloudflare, Cloudflare>(x => new Cloudflare(builder.Configuration));
 
+builder.Services.AddCors(x =>
+{
+    x.AddPolicy(name: "AllowAllOrigins", 
+        configurePolicy: config =>
+        {
+            config.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -40,6 +51,7 @@ builder.Services.AddLogging(x =>
     x.AddConsole(); 
 });
 
+builder.Services.AddGlobalErrorHandling();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 

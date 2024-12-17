@@ -11,6 +11,7 @@
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="13.0.1" />
       <PackageReference Include="AWSSDK.S3" Version="4.0.0-preview.2" />
+      <PackageReference Include="ErrorOr" Version="2.0.1" />
       <PackageReference Include="FluentValidation" Version="11.9.0" />
       <PackageReference Include="MailKit" Version="4.7.1.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
@@ -29,10 +30,6 @@
       <_ContentIncludedByDefault Remove="MarciaApi.Tests\obj\MarciaApi.Tests.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="MarciaApi.Tests\obj\project.assets.json" />
       <_ContentIncludedByDefault Remove="MarciaApi.Tests\obj\project.packagespec.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Application\Validator\Items\" />
     </ItemGroup>
 
 </Project>

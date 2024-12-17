@@ -6,4 +6,5 @@ public interface ICloudflare
 {
     IAmazonS3 S3Client { get; }
     Task AddFile(IFormFile file);
+    Task<string> GetFile(string nameFile);
 }

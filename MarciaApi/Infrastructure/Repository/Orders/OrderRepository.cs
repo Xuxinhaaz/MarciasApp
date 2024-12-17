@@ -1,4 +1,7 @@
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
+using ErrorOr;
+using MarciaApi.Domain.Data.Cloud;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Orders;
@@ -7,13 +10,16 @@ using MarciaApi.Infrastructure.Data;
 using MarciaApi.Presentation.DTOs.Items;
 using MarciaApi.Presentation.DTOs.Orders;
 using MarciaApi.Presentation.DTOs.Products;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using MarciaApi.Presentation.ViewModel.Orders;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MarciaApi.Infrastructure.Repository.Orders;
 
 public class OrderRepository : IOrderRepository
 {
     private readonly AppDbContext _context;
+    private readonly ICloudflare _cloudflare;
     private readonly IUserRepository _userRepository;
     private readonly IGenericRepository<Product, ProductDto> _productsGenericRepository;
     private readonly IGenericRepository<Order, OrderDto> _genericRepository;
@@ -23,15 +29,24 @@ public class OrderRepository : IOrderRepository
         IGenericRepository<Order, OrderDto> genericRepository, 
         IUserRepository userRepository,
         AppDbContext context, 
-        IGenericRepository<Product, ProductDto> productsGenericRepository, IGenericRepository<Item, ItemDto> genericItemRepository)
+        IGenericRepository<Product, ProductDto> productsGenericRepository, IGenericRepository<Item, ItemDto> genericItemRepository, ICloudflare cloudflare)
     {
         _genericRepository = genericRepository;
         _userRepository = userRepository;
         _context = context;
         _productsGenericRepository = productsGenericRepository;
         _genericItemRepository = genericItemRepository;
-    } 
-    
+        _cloudflare = cloudflare;
+    }
+
+    public void ReplaceCep(OrdersViewModel viewModel)
+    {
+        var formattedCep = Regex
+            .Replace(viewModel.Location?.CEP ?? string.Empty, @"(\d{5})[-\s](\d{3})", "$1$2");
+
+        viewModel.Location!.CEP = formattedCep;
+    }
+
     public async Task<OrderDto> Get(Expression<Func<Order, bool>> filter)
     {
         Order orders = await _genericRepository.Get(filter);
@@ -51,9 +66,12 @@ public class OrderRepository : IOrderRepository
         return dtos;
     }
 
-    public async Task<OrderDto> Generate(string id, OrdersViewModel model)
+    public async Task<ErrorOr<OrderDto>> Generate(string id, OrdersViewModel model)
     {
         var userFound = await _userRepository.Get(id);
+        if (userFound.IsError)
+            return userFound.Errors;
+        
         (double? finalPrice, List<Item>? RemovedItems, List<Product> products) valueTuple = await CalculatingPrice(model);
         
         var newOrder = new Order
@@ -65,7 +83,7 @@ public class OrderRepository : IOrderRepository
             UserPhone = model.UserPhone,
             PaymentType = model.PaymentType,
             TotalPrice = valueTuple.finalPrice,
-            UsersId = userFound.Id,
+            UsersId = userFound.Value.Id,
             RemovedItems = valueTuple.RemovedItems,
             Products = valueTuple.products,
             OrderDate = DateTime.UtcNow
@@ -77,7 +95,7 @@ public class OrderRepository : IOrderRepository
             model.Location.OrderId = newOrder.OrderId;
         }
 
-        userFound.Orders?.Add(newOrder);
+        userFound.Value.Orders?.Add(newOrder);
         await _genericRepository.Add(newOrder);
         await _context.SaveChangesAsync();
 
@@ -86,19 +104,28 @@ public class OrderRepository : IOrderRepository
         return orderDto;
     }   
 
-    public async Task Delete(Expression<Func<Order, bool>> filter)
+    public async Task<ErrorOr<bool>> Delete(Expression<Func<Order, bool>> filter)
     {
         var orderFound = await _genericRepository.Get(filter);
+        if (orderFound == null!)
+            return OrderRepositoryErrors.HaventFoundAnyOrder;
 
         await _genericRepository.Delete(orderFound);
+
+        return true;
     }
 
-    public async Task<bool> DeleteAnOrderByUserId(string userId, string orderId)
+    public async Task<ErrorOr<bool>> DeleteAnOrderByUserId(string userId, string orderId)
     {
         var userFound = await _userRepository.Get(userId);
-        var orderFound = await _genericRepository.Get(x => x.OrderId == orderId);
+        if (userFound.IsError)
+            return userFound.Errors;
         
-        if(userFound.Id != orderFound.UsersId) return false; 
+        var orderFound = await _genericRepository.Get(x => x.OrderId == orderId);
+        if (orderFound == null!)
+            return OrderRepositoryErrors.HaventFoundAnyOrderWithProvidedId;
+        
+        if(userFound.Value.Id != orderFound.UsersId) return false; 
 
         await _genericRepository.Delete(orderFound);
 
@@ -143,4 +170,6 @@ public class OrderRepository : IOrderRepository
         
         return (finalPrice, removedItems, products);
     }
+
+    
 }

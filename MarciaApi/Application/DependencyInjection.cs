@@ -6,7 +6,9 @@ using MarciaApi.Application.Mapping.Roles;
 using MarciaApi.Application.Mapping.User;
 using MarciaApi.Application.Services.Authentication;
 using MarciaApi.Application.Services.Validator;
+using MarciaApi.Application.Validator.Items;
 using MarciaApi.Application.Validator.Orders;
+using MarciaApi.Application.Validator.Products;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Items;
@@ -24,7 +26,9 @@ using MarciaApi.Presentation.DTOs.Orders;
 using MarciaApi.Presentation.DTOs.Products;
 using MarciaApi.Presentation.DTOs.Roles;
 using MarciaApi.Presentation.DTOs.User;
+using MarciaApi.Presentation.ViewModel.Items;
 using MarciaApi.Presentation.ViewModel.Orders;
+using MarciaApi.Presentation.ViewModel.Products;
 using MarciaApi.Presentation.ViewModel.User;
 
 namespace MarciaApi.Application;
@@ -35,6 +39,8 @@ public static class DependencyInjection
     {
         services.AddScoped<IValidator<UserViewModel>, UserViewModelValidator>();
         services.AddScoped<IValidator<OrdersViewModel>, OrderViewModelValidator>();
+        services.AddScoped<IValidator<ItemsViewModel>, ItemViewModelValidator>();
+        services.AddScoped<IValidator<ProductsViewModel>, ProductsViewModelValidator>();
         
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
@@ -54,6 +60,19 @@ public static class DependencyInjection
         services.AddAutoMapper(typeof(DomainToProductDto));
         services.AddAutoMapper(typeof(DomainToItemDto));
         services.AddAutoMapper(typeof(DomainToRoleDto));
+        
+        return services;
+    }
+    
+    public static IServiceCollection AddGlobalErrorHandling(this IServiceCollection services)
+    {
+        services.AddProblemDetails(opt =>
+        {
+            opt.CustomizeProblemDetails = context =>
+            {
+                context.ProblemDetails.Extensions["TraceId"] = context.HttpContext.TraceIdentifier;
+            };
+        });
         
         return services;
     }

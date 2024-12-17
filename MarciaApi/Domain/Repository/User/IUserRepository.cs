@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using ErrorOr;
 using MarciaApi.Domain.Models;
 using MarciaApi.Presentation.DTOs.Orders;
 using MarciaApi.Presentation.DTOs.User;
@@ -8,9 +9,9 @@ namespace MarciaApi.Domain.Repository.User;
 
 public interface IUserRepository
 {
-    Task<UserModel> Generate(UserViewModel model);
+    Task<ErrorOr<UserModel>> Generate(UserViewModel model);
     Task<List<UserModelDto>> Get(int pageNumber);
-    Task<UserModelDto> Get(string id);
+    Task<ErrorOr<UserModelDto>> Get(string id);
     Task<bool> Any(Expression<Func<UserModel, bool>> filter);
     Task<UserModel> Get(Expression<Func<UserModel, bool>> filter, params Expression<Func<UserModel, object>>[] includes);
 

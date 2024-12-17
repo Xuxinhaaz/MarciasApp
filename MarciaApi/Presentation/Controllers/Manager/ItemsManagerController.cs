@@ -1,5 +1,8 @@
+using ErrorOr;
+using FluentValidation;
 using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Infrastructure.Services.Auth.Authorizarion;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using MarciaApi.Presentation.ViewModel.Items;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,25 +13,24 @@ public class ItemsManagerController
 {
     private readonly IAuthorizationService _authorizationService;
     private readonly IItemsRepository _itemsRepository;
+    private readonly IValidator<ItemsViewModel> _validator;
 
-    public ItemsManagerController(IItemsRepository itemsRepository, IAuthorizationService authorizationService)
+    public ItemsManagerController(IItemsRepository itemsRepository, IAuthorizationService authorizationService, IValidator<ItemsViewModel> validator)
     {
         _itemsRepository = itemsRepository;
         _authorizationService = authorizationService;
+        _validator = validator;
     }
 
     [HttpGet("/Manager/Items")]
     public async Task<IActionResult> Get([FromHeader] string authorization, [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
         
@@ -41,26 +43,20 @@ public class ItemsManagerController
     [HttpGet("/Manager/Items/{id}")]
     public async Task<IActionResult> GetById([FromHeader] string authorization, [FromRoute] string id)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "você não pode acessar este endpoint!"
-                }
+                auth.Errors
             });
         }
 
         if (!await _itemsRepository.Any(x => x.ItemId == id))
         {
-            return new BadRequestObjectResult(new
+            return new NotFoundObjectResult(new
             {
-                errors = new
-                {
-                    message = "Este item não está registrado no sistema!"
-                }
+                Errors = ItemsRepositoryErrors.ThereIsntItemWithProvidedId
             });
         }
         
@@ -73,15 +69,34 @@ public class ItemsManagerController
     [HttpPost("/Manager/Items")]
     public async Task<IActionResult> Post([FromHeader] string authorization, [FromBody] ItemsViewModel viewModel)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
+            });
+        }
+        
+        var validationResponse = _validator.Validate(viewModel);
+        if (!validationResponse.IsValid)
+        {
+            var errors = validationResponse.Errors
+                .Select(x => Error.Validation(x.PropertyName, x.ErrorMessage))
+                .ToList();
+
+            return new BadRequestObjectResult(new
+            {
+                errors
+            });
+        }
+
+        var isThereAnyItemWithExistedName = await _itemsRepository.Any(x => x.ItemName == viewModel.ItemName);
+        if (isThereAnyItemWithExistedName)
+        {
+            return new BadRequestObjectResult(new
+            {
+                Errors = ItemsRepositoryErrors.AlreadyExistsItemWithProvidedName
             });
         }
         

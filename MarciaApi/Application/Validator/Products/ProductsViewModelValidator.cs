@@ -1,6 +1,5 @@
 using FluentValidation;
 using MarciaApi.Presentation.ViewModel.Products;
-using Microsoft.IdentityModel.Protocols;
 
 namespace MarciaApi.Application.Validator.Products;
 
@@ -27,6 +26,16 @@ public class ProductsViewModelValidator : AbstractValidator<ProductsViewModel>
         RuleFor(x => x.Price)
             .NotEmpty()
             .WithMessage(NotEmpty("preço"));
+
+        RuleFor(x => x.ProductPhoto)
+            .NotNull().WithMessage(NotEmpty("foto do produto"))
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.ProductPhoto)
+                    .Must(BeAValidaFormFileFormat).WithMessage("o arquivo deve estar em um formato válido, como: .jpg, .svg, .jpeg ou .png")
+                    .Must(x => x.Length > 0).WithMessage("o arquivo não pode estar vazio")
+                    .Must(x => x.Length <= 100 * 1024 * 1024).WithMessage("o arquivo não pode exceder 100MB");
+            });
 
         RuleForEach(x => x.ItemsNames).ChildRules(x =>
         {
@@ -68,6 +77,11 @@ public class ProductsViewModelValidator : AbstractValidator<ProductsViewModel>
         
         return $"o campo {field} deve conter no máximo {Convert.ToString(quantity)} caracteres";
     }
-    
-   
+
+    private bool BeAValidaFormFileFormat(IFormFile? file)
+    {
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".svg" };
+        var extension = Path.GetExtension(file.FileName).ToLower();
+        return allowedExtensions.Contains(extension);
+    }
 }

@@ -1,6 +1,8 @@
 using AutoMapper;
+using ErrorOr;
 using MarciaApi.Application.Services.Authentication;
 using MarciaApi.Application.Services.Email;
+using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository.User;
 using MarciaApi.Presentation.DTOs.User;
 using MarciaApi.Presentation.ViewModel.User;
@@ -24,45 +26,41 @@ public class AuthenticationService : IAuthenticationService
         _emailSender = emailSender;
     }
 
-    public async Task<UserModelDto> SignUpAsync(UserViewModel model)
+    public async Task<ErrorOr<UserModelDto>> SignUpAsync(UserViewModel model)
     {
-        try
-        {
             var anyUserSignedUp = await _userRepository.Any(x => x.Email == model.Email);
 
             if (anyUserSignedUp)
             {
-                Console.WriteLine("Passei aqui");
-                
                 await _emailSender.SendEmailAsync(model.Email!, 
                     "Marmitaria da Marcia",
-                    "caio's Dick is the smallest i've ever seen!!!!!");
+                    "OMG IM CUMMING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
                 var userFound = await _userRepository.Get(x => x.Email == model.Email, x => x.Roles);
-                var tokenJwt = await _jwtService.Generate(userFound);
+                var tokenresult = await _jwtService.Generate(userFound);
+                if (tokenresult.IsError)
+                    return tokenresult.Errors;
                 
                 var userFoundDto = _mapper.Map<UserModelDto>(userFound);
-                userFoundDto.JwtToken = tokenJwt;
+                userFoundDto.JwtToken = tokenresult.Value;
                 
                 return userFoundDto;
             }   
             
-            var newUser = await _userRepository.Generate(model);
-            var token = await _jwtService.Generate(newUser);
-            
+            ErrorOr<UserModel> ModelResult = await _userRepository.Generate(model);
+            if (ModelResult.IsError)
+                return ModelResult.Errors;
+            ErrorOr<string> tokenResult = await _jwtService.Generate(ModelResult.Value);
+            if (tokenResult.IsError)
+                return tokenResult.Errors;
+        
             await _emailSender.SendEmailAsync(model.Email, 
                 "Marmitaria da Marcia",
-                "caio's Dick is the smallest i've ever seen!!!!!");
+                "OMG IM CUMMING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             
-            var dto = _mapper.Map<UserModelDto>(newUser);
-            dto.JwtToken = token;
+            var dto = _mapper.Map<UserModelDto>(tokenResult.Value);
+            dto.JwtToken = tokenResult.Value;
 
             return dto;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during sign-up");
-            throw;
-        }
     }
 }

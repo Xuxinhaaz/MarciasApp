@@ -20,15 +20,12 @@ public class UsersManagerController
     [HttpGet("/Manager/Users")] 
     public async Task<IActionResult> GetUsers([FromHeader] string authorization, [FromQuery] int pageNumber)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
         
@@ -41,15 +38,12 @@ public class UsersManagerController
     [HttpDelete("/Manager/Users/{id}")]
     public async Task<IActionResult> DeleteAnUser([FromHeader] string authorization, [FromRoute] string id)
     {
-        var auth = await _authorizationService.AuthorizeManager(authorization);
-        if (!auth)
+        var auth = _authorizationService.AuthorizeManager(authorization);
+        if (auth.IsError)
         {
             return new UnauthorizedObjectResult(new
             {
-                errors = new
-                {
-                    message = "cannot access this endpoint"
-                }
+                auth.Errors
             });
         }
 
@@ -60,7 +54,7 @@ public class UsersManagerController
             {
                 errors = new
                 {
-                    message = "User not found!"
+                    message = "Usuario não encontrado!"
                 }
             });
         }

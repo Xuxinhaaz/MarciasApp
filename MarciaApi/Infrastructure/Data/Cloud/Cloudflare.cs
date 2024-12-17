@@ -51,4 +51,18 @@ public class Cloudflare : ICloudflare
             await _s3Client.PutObjectAsync(putObjectRequest);
         }
     }
+
+    public async Task<string> GetFile(string nameFile)
+    {
+        GetObjectRequest request = new()
+        {
+            BucketName = _configuration["Cloudflare:Buckets:Main"],
+            Key = nameFile
+        };
+        
+        using var result = await 
+            _s3Client.GetObjectAsync(request);
+
+        return result.ETag;
+    }
 }

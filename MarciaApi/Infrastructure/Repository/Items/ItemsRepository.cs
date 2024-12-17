@@ -1,8 +1,10 @@
 using System.Linq.Expressions;
+using ErrorOr;
 using MarciaApi.Domain.Models;
 using MarciaApi.Domain.Repository;
 using MarciaApi.Domain.Repository.Items;
 using MarciaApi.Presentation.DTOs.Items;
+using MarciaApi.Presentation.Errors.RepositoryErrors;
 using MarciaApi.Presentation.ViewModel.Items;
 
 namespace MarciaApi.Infrastructure.Repository.Items;
@@ -26,11 +28,14 @@ public class ItemsRepository : IItemsRepository
         return itemDtos;
     }
 
-    public async Task<ItemDto> Get(string id)
+    public async Task<ErrorOr<ItemDto>> Get(string id)
     {
         Item item = await _genericRepository.Get(
             m => m.ItemId == id,
             m => m.Products!);
+        if (item == null)
+            return ItemsRepositoryErrors.ThereIsntItemWithProvidedId;
+        
         ItemDto dto = await _genericRepository.Map(item);
         
         return dto;
@@ -51,7 +56,7 @@ public class ItemsRepository : IItemsRepository
         return newItem;
     }
 
-    public async Task<List<Item>> GetByName(List<string>? itemsNames)
+    public async Task<ErrorOr<List<Item>>> GetByName(List<string>? itemsNames)
     {
         var foundItems = new List<Item>();
         
@@ -61,6 +66,9 @@ public class ItemsRepository : IItemsRepository
                 await _genericRepository.Get(x => x.ItemName != null && x.ItemName.ToUpper() == item.ToUpper(),
                 x => x.Products!));
         }
+
+        if (foundItems.Count < 0)
+            return ItemsRepositoryErrors.ThereIsntItemWithProvidedSameName;
 
         return foundItems;
     }
