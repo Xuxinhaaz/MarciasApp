@@ -1,4 +1,4 @@
-import { Food } from './../../../Components/model/Foods';
+import { Food } from '../../../model/Food';
 import { Component, ElementRef, viewChild } from '@angular/core';
 import { MktHeaderComponent } from "../../../Components/mktHeader/mkt-header/mkt-header.component";
 import { NgFor, ViewportScroller } from '@angular/common';
