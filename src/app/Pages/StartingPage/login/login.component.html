@@ -1,0 +1,32 @@
+<img src="topHome.svg" alt="" id="topHome">
+<img src="bottomHome.svg" alt="" id="bottomHome">
+<app-header />
+<section>
+    <div class="login">
+        <div class="inputWrapper">
+            <h2 id="title">Ingredientes frescos e de alta qualidade!</h2>
+            <h2>Login</h2>
+
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" formControlName="email" placeholder="Digite seu email">
+              <i
+                *ngIf="registerForm.controls['email'].invalid && (registerForm.controls['email'].dirty || registerForm.controls['email'].touched)">
+                O email tem que ser valido
+              </i>
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" formControlName="password" placeholder="Digite sua senha">
+              <i
+                *ngIf="registerForm.controls['password'].invalid && (registerForm.controls['password'].dirty || registerForm.controls['password'].touched)">
+                A senha tem que ter 7 digitos
+              </i>
+              <button class="btn" type="submit" [disabled]="registerForm.invalid" (click)="onSubmit()">Login</button>
+            </form>
+        </div>
+    </div>
+    <div class="info">
+        <img src="/foodsImg/pizza.png" alt="" id="pizza">
+        <p class="local">R. Severino Barbiere, 114 - Independência Toledo - PR, 85906-570 </p>
+    </div>
+
+</section>

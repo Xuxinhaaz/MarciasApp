@@ -1,0 +1,77 @@
+
+:host{
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-y: hidden;
+    font-family: "Rubik", sans-serif;
+}
+#topHome{
+    position: absolute;
+    z-index: -1;
+    height: 100%;
+    width: 100%;
+}
+#bottomHome{
+    position:absolute;
+    bottom: 0;
+    z-index: -1;
+}
+section{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+.login{
+    margin-left:3rem;
+    position: relative;
+    width: 50%;
+    height: 100%;
+}
+.info{
+    position: relative;
+    width: 50%;
+    height: 100%;
+}
+#pizza{
+    height: 25rem;
+    width: 25rem;
+    padding-left: 3rem;
+}
+h2{
+    font-weight: 500;
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+p{
+    font-weight: 400;
+    font-size: 25px;
+    line-height: 2rem;
+    margin-top: 0;
+    text-align: center;
+    width: 80%;
+    color: black;
+}
+
+form{
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20rem;
+  height: 15rem;
+  margin-left: 5rem;
+  input{
+    margin-top: 1rem;
+    height: 2rem;
+
+  }
+  .btn{
+    height: 2rem;
+    background-color: #075985;
+    color: black;
+  }
+}
